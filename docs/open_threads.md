@@ -9,15 +9,14 @@ Remove an entry when it is done: the pull request is the record.
 ## Decisions needed
 
 ## Spec pack
-- 🔲 Fill `docs/spec/` (`/grill-with-docs`, then `/to-spec`).
+- 🔄 Fill `docs/spec/` (`/grill-with-docs`, then `/to-spec`). The interview
+  is two rounds in; see `handoff.md`.
 - 🔲 Choose the stack: ADR, "Technical baseline" in `spec/constraints.md`,
   CI and the command allowlist ("Choosing the stack" in the workflow).
 
 ## Features — parked
 
 ## Harness
-- 🔲 Per repository made from the template: apply branch protection and
-  create the `plan-approved` label (README, step 2).
 - 💡 A separate GitHub account or a fine-grained token for work sessions, so
   the assistant cannot merge or approve even if it words around the deny
   rules (ADR-003).

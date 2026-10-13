@@ -6,4 +6,22 @@ words and no synonyms. Format: `.claude/skills/domain-modeling/CONTEXT-FORMAT.md
 
 ## Terms
 
-*(none yet)*
+**Player**:
+A person who plays osu! and uses osu-fy to listen to the game's songs outside the game.
+_Avoid_: User, account
+
+**Beatmapset**:
+One upload in osu!: a piece of music with one or more difficulties. It is what a Player has installed or has in the lists on their osu! account.
+_Avoid_: Map, beatmap, mapset
+
+**Song**:
+A piece of music, identified by artist and title. Several Beatmapsets of the same piece, including cut versions, are one Song.
+_Avoid_: Ingame song, title
+
+**Track**:
+The item on a Streaming service that a Song is matched to. A playlist holds each Track once.
+_Avoid_: Song (for the service's item), result
+
+**Streaming service**:
+A music service on which a Player has an account and where osu-fy creates playlists for them. Spotify is the first; others follow later.
+_Avoid_: Platform, provider, music service
