@@ -1,0 +1,16 @@
+# Who must review what. With one person this file changes nothing: GitHub
+# does not let the author of a pull request approve it. It starts to matter
+# when a second person joins and branch protection requires a code owner's
+# review. Until then the paths below are a reading list: changes under them
+# are read line by line (docs/process/workflow.md, Phase 6).
+#
+# Replace the examples with the project's real paths and uncomment.
+
+# The harness itself
+# /.claude/        @owner
+# /.github/        @owner
+# /CLAUDE.md       @owner
+
+# Security-sensitive code (examples; use the project's real paths)
+# /app/**/crypto/     @owner
+# /app/**/security/   @owner

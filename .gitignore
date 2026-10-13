@@ -1,0 +1,24 @@
+# Secrets and local data — never commit
+.env
+.env.*
+data/
+
+# Claude Code: personal settings stay local
+.claude/settings.local.json
+
+# Gradle / Java
+.gradle/
+build/
+*.class
+
+# Node (when the app has a frontend)
+node_modules/
+dist/
+test-results/
+playwright-report/
+
+# OS / editor
+.DS_Store
+.idea/
+*.iml
+.vscode/

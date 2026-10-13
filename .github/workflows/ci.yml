@@ -1,0 +1,54 @@
+# CI. Runs on every pull request into main and on main itself. A green run is
+# one of the three things a merge needs; the other two are the human's review
+# and the human's check in the running app (docs/process/workflow.md).
+#
+# The harness does not fix a stack, so the tests job is a placeholder: it
+# passes while there is no app/, and fails once app/ exists until it has been
+# replaced with the project's toolchain and test command ("Choosing the
+# stack" in docs/process/workflow.md).
+#
+# The secret scan runs on pull requests, which is where every change to main
+# comes from, and on a manual run (Actions -> CI -> Run workflow), which scans
+# the whole history. It does not run on pushes: the action cannot scan a push
+# that contains the repository's first commit, so every new project would
+# start with a red main.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  secrets:
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    # The action lists the pull request's commits through the API.
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Scan for committed secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # Replace the step below with: toolchain setup (e.g. actions/setup-java,
+      # actions/setup-node), then the "Run every test" command and the
+      # end-to-end command from docs/spec/constraints.md.
+      - name: Tests are not set up yet
+        run: |
+          if [ -d app ]; then
+            echo "::error::app/ exists, but CI runs no tests. Replace this step with the project's toolchain and test commands (docs/process/workflow.md, 'Choosing the stack')."
+            exit 1
+          fi
+          echo "No app/ yet (spec or harness change). Nothing to test."
