@@ -111,7 +111,9 @@ def test_US_02_4_skips_files_that_are_not_osu_files(tmp_path: Path) -> None:
         (tmp_path / "files" / "c" / name / name).write_bytes(content)
     osu_file(tmp_path, "d1", "Title:no artist\n")
     osu_file(tmp_path, "d2", "Artist:no title\n")
-    osu_file(tmp_path, "e1", "Artist:A\nTitle:T\nBeatmapSetID:7\n", prefix=b"\xef\xbb\xbf")
+    osu_file(
+        tmp_path, "e1", "Artist:A\nTitle:T\nBeatmapSetID:7\n", prefix=b"\xef\xbb\xbf"
+    )
 
     assert read(tmp_path) == [Beatmapset(7, "A", "", "T", "")]
 

@@ -33,7 +33,9 @@ class LazerSource:
             beatmapset = _read_osu_file(path)
             if beatmapset is not None:
                 # Q3 of #6: without a set id, equal metadata is one Beatmapset
-                key = beatmapset if beatmapset.online_id is None else beatmapset.online_id
+                key = (
+                    beatmapset if beatmapset.online_id is None else beatmapset.online_id
+                )
                 beatmapsets.setdefault(key, beatmapset)
             progress(done, len(files))
         return list(beatmapsets.values())
