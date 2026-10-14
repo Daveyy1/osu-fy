@@ -18,7 +18,7 @@ def main() -> None:
     try:
         run_session(TerminalPlayer(console), LazerSource(roaming), roaming / "osu-fy")
     except SettingsUnreadable as error:
-        console.print(str(error), markup=False)
+        console.print(str(error), markup=False, soft_wrap=True)
     except (KeyboardInterrupt, PlayerQuit):
         pass  # Ctrl+C or q quits quietly: no traceback for the Player (persona)
 

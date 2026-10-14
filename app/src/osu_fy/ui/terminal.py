@@ -25,9 +25,8 @@ class TerminalPlayer:
             pass
 
     def confirm_lazer_folder(self, path: Path) -> bool:
-        # markup=False: a folder name like "[old]" must print as it is
-        self._console.print(str(path), markup=False)
-        self._console.print("Use this lazer folder? [Y/n] ", end="", markup=False)
+        self._say(str(path))
+        self._say("Use this lazer folder? [Y/n] ", end="")
         while (key := readchar.readkey()) not in YES + NO + QUIT:
             pass
         self._console.print()
@@ -43,7 +42,11 @@ class TerminalPlayer:
         return Path(typed).absolute()
 
     def show_no_lazer_data(self, path: Path) -> None:
-        self._console.print(f"No lazer data found in {path}", markup=False)
+        self._say(f"No lazer data found in {path}")
 
     def show_reading_lazer_folder(self, path: Path) -> None:
-        self._console.print(f"Reading lazer folder {path}", markup=False)
+        self._say(f"Reading lazer folder {path}")
+
+    def _say(self, text: str, end: str = "\n") -> None:
+        # A path prints as it is: "[old]" is no markup, and the terminal wraps it
+        self._console.print(text, end=end, markup=False, soft_wrap=True)

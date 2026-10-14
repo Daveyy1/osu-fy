@@ -112,3 +112,12 @@ def test_US_01_3_and_01_4_messages_show_the_path_as_typed() -> None:
     assert console.export_text() == (
         "No lazer data found in D:\\[old] osu\nReading lazer folder D:\\[bold]osu\n"
     )
+
+
+def test_long_paths_are_not_broken_into_lines() -> None:
+    console = Console(record=True, width=20)
+    path = Path("C:/" + "long-folder-name/" * 3)
+
+    TerminalPlayer(console).show_reading_lazer_folder(path)
+
+    assert console.export_text() == f"Reading lazer folder {path}\n"
