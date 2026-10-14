@@ -7,14 +7,18 @@ requests are the record of that.*
 
 ## Resume here (the exact next step)
 1. The spec, ADR-004 to ADR-007 and the toolchain (PRs #1 to #3) are on
-   `main`, and so are the walking skeleton (#4, PR #18) and US-01, find
-   the lazer folder (#5, PR #20): `LazerSource`, the `Source` port and
-   `settings.json` in the app-data folder. Issues #6 to #16 hold the rest
+   `main`, and so are the walking skeleton (#4, PR #18), US-01, find the
+   lazer folder (#5, PR #20), and US-02, read Songs from lazer (#6,
+   PR #22): Beatmapsets read from lazer's file store, the Song key, and
+   the sample lazer folder in `app/tests/sample-lazer/`. The Songs are not
+   kept between Sessions yet (US-05, US-09). Issues #7 to #16 hold the rest
    of version one, one per ticket, with GitHub's native "blocked by" links;
    `docs/spec/roadmap.md` maps them.
 2. Next: in a work session (`claude --settings .claude/work-settings.json`),
-   `/plan 6` (read Songs from lazer, US-02). Then the owner answers and sets
-   `plan-approved`, and `/build`.
+   `/plan 7` (connect to Spotify, US-03). Then the owner answers and sets
+   `plan-approved`, and `/build`. Before the hand check of #7, the owner
+   creates a Spotify developer app with the redirect URI
+   `http://127.0.0.1:8765/callback` (roadmap: #7 is blocked by it).
 
 ## Settled in the interview (rounds 1 to 7), now written into `docs/spec/`
 - **What it is:** osu-fy turns the Songs a Player knows from osu! into a
