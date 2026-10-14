@@ -58,7 +58,7 @@ jobs:
           fi
       - name: Set up uv
         if: steps.app.outputs.present == 'true'
-        uses: astral-sh/setup-uv@v10
+        uses: astral-sh/setup-uv@v10.3.0  # no floating major tag exists; pin the release
         with:
           enable-cache: true
           cache-dependency-glob: app/uv.lock
