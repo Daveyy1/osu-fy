@@ -14,19 +14,8 @@ Remove an entry when it is done: the pull request is the record.
 ## Spec pack
 - 🔲 After the toolchain PR: `/to-tickets` on the feature spec, one issue
   per story, US-01 to US-11.
-- 🔲 Install uv on the owner's machine (`winget install astral-sh.uv`):
-  work sessions and the hand checks run the baseline commands with it.
 - 🔲 Before US-05: the owner confirms about ten missed Songs (y/n) for the
   matching quality set; the assistant proposes the Tracks.
 - 🔲 In US-05's plan: check whether Spotify's developer terms allow
   committing recorded API responses to a public repository
   (`spec/constraints.md`, "Test data in the repository").
-
-## Features — parked
-
-## Harness
-- 💡 A separate GitHub account or a fine-grained token for work sessions, so
-  the assistant cannot merge or approve even if it words around the deny
-  rules (ADR-003).
-- 💡 Turn on Claude Code's sandbox for work sessions where the platform
-  supports it (ADR-003).
