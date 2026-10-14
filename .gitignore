@@ -2,23 +2,30 @@
 .env
 .env.*
 data/
+# spotipy's default token cache (ADR-004: osu-fy never uses it)
+.cache
+.cache-*
 
 # Claude Code: personal settings stay local
 .claude/settings.local.json
 
-# Gradle / Java
-.gradle/
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
 build/
-*.class
-
-# Node (when the app has a frontend)
-node_modules/
 dist/
-test-results/
-playwright-report/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.import_linter_cache/
+.coverage
+htmlcov/
 
 # OS / editor
 .DS_Store
+Thumbs.db
 .idea/
 *.iml
 .vscode/

@@ -278,3 +278,9 @@ So the reviewer can spend attention where it matters:
 - **v2.1 (2026-10-14)** — the root `README.md` describes the app, not the
   harness; the harness overview moved to `docs/process/harness.md`. Why: the
   repository is public, and its front page should say what the app is.
+- **v2.2 (2026-10-14)** — osu-fy's stack is set up (ADR-004, ADR-005): the
+  CI `tests` job runs the Technical baseline on `windows-latest`, one
+  command per step, and skips while there is no `app/`; the work allowlist
+  gains the `uv` build and test commands; `uv add` stays unlisted, so a new
+  dependency is always a visible step. Why: osu-fy is Windows-first, and a
+  multi-line PowerShell step only fails on its last command.
