@@ -121,3 +121,23 @@ def test_long_paths_are_not_broken_into_lines() -> None:
     TerminalPlayer(console).show_reading_lazer_folder(path)
 
     assert console.export_text() == f"Reading lazer folder {path}\n"
+
+
+def test_US_02_5_progress_bar_reaches_the_screen() -> None:
+    console = Console(record=True, width=80)
+    player = TerminalPlayer(console)
+
+    for done in range(1, 1235):
+        player.show_files_read(done, 1234)
+
+    screen = console.export_text()
+    assert "Reading lazer folder" in screen
+    assert screen.rstrip().endswith("1,234/1,234 files")
+
+
+def test_US_02_1_songs_found_reaches_the_screen() -> None:
+    console = Console(record=True, width=80)
+
+    TerminalPlayer(console).show_songs_found(8, 9)
+
+    assert console.export_text() == "Found 8 Songs in 9 Beatmapsets\n"
