@@ -9,6 +9,7 @@ class ScriptedPlayer:
     def __init__(self, *answers: bool | str) -> None:
         self.answers = list(answers)
         self.shown: list[str] = []
+        self.files_read: list[tuple[int, int]] = []
 
     def greet(self) -> None:
         self.shown.append("greet")
@@ -33,6 +34,12 @@ class ScriptedPlayer:
 
     def show_reading_lazer_folder(self, path: Path) -> None:
         self.shown.append(f"Reading lazer folder {path}")
+
+    def show_files_read(self, done: int, total: int) -> None:
+        self.files_read.append((done, total))
+
+    def show_songs_found(self, songs: int, beatmapsets: int) -> None:
+        self.shown.append(f"Found {songs} Songs in {beatmapsets} Beatmapsets")
 
     def _next(self) -> bool | str:
         assert self.answers, "osu-fy asked more than the script answers"

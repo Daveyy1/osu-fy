@@ -11,9 +11,10 @@ Python 3.13 and the locked dependencies by itself.
 uv run --directory app osu-fy
 ```
 
-It greets you, finds your lazer folder (US-01), shows "Reading lazer folder
-<path>" and waits; `q` (or `Q`, or Ctrl+C) quits at any prompt. Reading the
-folder is not built yet (US-02).
+It greets you, finds your lazer folder (US-01), reads it with a progress
+bar and shows "Found <n> Songs in <m> Beatmapsets" (US-02), then waits;
+`q` (or `Q`, or Ctrl+C) quits at any prompt. Connecting to Spotify is not
+built yet (US-03).
 
 **Files:** osu-fy remembers the confirmed lazer folder in
 `%APPDATA%\osu-fy\settings.json`. It only reads `%APPDATA%\osu` and the lazer
@@ -32,6 +33,14 @@ folder, never writes there.
 | Remembered folder (US-01.4) | Start osu-fy again after confirming a folder. |
 | Remembered folder lost (US-01.5) | Confirm a folder with a typed path, then rename its `files` folder. |
 | Unreadable settings | Write `{not json` into `%APPDATA%\osu-fy\settings.json`. |
+
+### Reaching each state of US-02
+
+| State | How |
+|-------|-----|
+| The sample lazer folder (US-02.1 to US-02.3) | Answer `n` and type the path of `app\tests\sample-lazer`. It shows "Found 8 Songs in 9 Beatmapsets". Afterwards osu-fy remembers it: use a stand-in `%APPDATA%` (below), or a fresh start to go back to your own folder. |
+| Your real lazer folder (US-02.4 to US-02.6): its audio, images and skins are skipped quietly | Fresh start, accept the default folder. For US-02.6, run `dir /s /t:w %APPDATA%\osu > before.txt` in `cmd` before and `> after.txt` after, then `fc before.txt after.txt`. |
+| Empty lazer folder | Type the path of a folder holding only an empty `files` folder: "Found 0 Songs in 0 Beatmapsets". |
 
 A stand-in `%APPDATA%` for one PowerShell window (osu-fy then remembers
 nothing in the real one): `mkdir $env:TEMP\roaming; $env:APPDATA =
@@ -61,6 +70,7 @@ src/osu_fy/
   ui/         the terminal Player: rich for output, readchar for keys
   __main__.py the osu-fy command; wires adapters and UI into the core
 tests/        pytest, one file per module it covers
+  sample-lazer/  the sample lazer folder: 9 Beatmapsets, .osu files only
 ```
 
 The core imports nothing from `adapters/`, `ui/`, spotipy, rich or

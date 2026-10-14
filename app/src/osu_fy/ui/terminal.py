@@ -4,6 +4,7 @@ from pathlib import Path
 
 import readchar
 from rich.console import Console
+from rich.progress import BarColumn, Progress, TextColumn
 
 from osu_fy.core.ports import PlayerQuit
 
@@ -15,6 +16,7 @@ QUIT = ("q", "Q")
 class TerminalPlayer:
     def __init__(self, console: Console) -> None:
         self._console = console
+        self._progress: Progress | None = None
 
     def greet(self) -> None:
         self._console.print("osu-fy — your osu! Songs, on Spotify")
@@ -46,6 +48,24 @@ class TerminalPlayer:
 
     def show_reading_lazer_folder(self, path: Path) -> None:
         self._say(f"Reading lazer folder {path}")
+
+    def show_files_read(self, done: int, total: int) -> None:
+        if self._progress is None:
+            self._progress = Progress(
+                TextColumn("Reading lazer folder"),
+                BarColumn(),
+                TextColumn("{task.completed:,.0f}/{task.total:,.0f} files"),
+                console=self._console,
+            )
+            self._progress.add_task("", total=total)
+            self._progress.start()
+        self._progress.update(self._progress.task_ids[0], completed=done)
+        if done == total:
+            self._progress.stop()
+            self._progress = None
+
+    def show_songs_found(self, songs: int, beatmapsets: int) -> None:
+        self._say(f"Found {songs} Songs in {beatmapsets} Beatmapsets")
 
     def _say(self, text: str, end: str = "\n") -> None:
         # A path prints as it is: "[old]" is no markup, and the terminal wraps it
