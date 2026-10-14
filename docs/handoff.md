@@ -7,12 +7,13 @@ requests are the record of that.*
 
 ## Resume here (the exact next step)
 1. The spec, ADR-004 to ADR-007 and the toolchain (PRs #1 to #3) are on
-   `main`, and so is the walking skeleton (#4, PR #18): `app/` with the
-   core, adapters and UI packages and the import contracts. Issues #5 to
-   #16 hold the rest of version one, one per ticket, with GitHub's native
-   "blocked by" links; `docs/spec/roadmap.md` maps them.
+   `main`, and so are the walking skeleton (#4, PR #18) and US-01, find
+   the lazer folder (#5, PR #20): `LazerSource`, the `Source` port and
+   `settings.json` in the app-data folder. Issues #6 to #16 hold the rest
+   of version one, one per ticket, with GitHub's native "blocked by" links;
+   `docs/spec/roadmap.md` maps them.
 2. Next: in a work session (`claude --settings .claude/work-settings.json`),
-   `/plan 5` (find the lazer folder, US-01). Then the owner answers and sets
+   `/plan 6` (read Songs from lazer, US-02). Then the owner answers and sets
    `plan-approved`, and `/build`.
 
 ## Settled in the interview (rounds 1 to 7), now written into `docs/spec/`
