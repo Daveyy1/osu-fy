@@ -9,10 +9,12 @@ Remove an entry when it is done: the pull request is the record.
 ## Decisions needed
 
 ## Spec pack
-- 🔄 Fill `docs/spec/` (`/grill-with-docs`, then `/to-spec`). The interview
-  is two rounds in; see `handoff.md`.
-- 🔲 Choose the stack: ADR, "Technical baseline" in `spec/constraints.md`,
-  CI and the command allowlist ("Choosing the stack" in the workflow).
+- 🔄 Fill `docs/spec/` with `/to-spec`. The interview is done (7 rounds);
+  the answers are in `handoff.md`.
+- 🔄 Choose the stack: agreed in the interview (Python 3.13, uv, spotipy;
+  see `handoff.md`). Still to write: the ADR, "Technical baseline" in
+  `spec/constraints.md`, then CI and the command allowlist in a `process/`
+  PR ("Choosing the stack" in the workflow).
 
 ## Features — parked
 

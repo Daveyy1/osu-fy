@@ -25,3 +25,31 @@ _Avoid_: Song (for the service's item), result
 **Streaming service**:
 A music service on which a Player has an account and where osu-fy creates playlists for them. Spotify is the first; others follow later.
 _Avoid_: Platform, provider, music service
+
+**Source**:
+A place where osu-fy finds the Beatmapsets a Player knows: the lazer install first; the stable install and the lists on the osu! account later.
+_Avoid_: Input, import, scan
+
+**Playlist**:
+The one playlist osu-fy creates for a Player on a Streaming service, named by the Player, private by default, and only ever appended to.
+_Avoid_: List, export
+
+**Match**:
+A Song paired with the Track osu-fy believes is the same piece of music.
+_Avoid_: Result, hit
+
+**Certain match**:
+A Match osu-fy adds to the Playlist without asking.
+_Avoid_: Confident match, auto-match
+
+**Doubtful match**:
+A Match that goes into the Playlist only if the Player says yes in the Review.
+_Avoid_: Review item, uncertain match, candidate
+
+**Unmatched Song**:
+A Song for which osu-fy found no plausible Track. It is listed for the Player, never added.
+_Avoid_: Missing song, failed match
+
+**Review**:
+The step in which the Player decides which Doubtful matches go into the Playlist, all at once or one by one.
+_Avoid_: Confirmation, check
