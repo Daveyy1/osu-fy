@@ -1,6 +1,6 @@
 # Feature spec — From lazer to a Spotify Playlist
 
-*Version one of osu-fy. Built story by story, US-01 to US-10
+*Version one of osu-fy. Built story by story, US-01 to US-11
 (`../../user_stories.md`), one issue and one reviewed pull request each.
 Words as in `CONTEXT.md`.*
 
@@ -157,6 +157,12 @@ Failures
 50. As a Player, I want a clear message without a traceback when Spotify
     cannot be reached, so that I know it is not my fault and nothing is lost.
 
+Sharing
+51. As a friend of the owner, I want a README that takes me from nothing to
+    a filled Playlist, so that I do not need the owner's help.
+52. As a Player, I want the README to say what osu-fy stores, where, and how
+    to start over or remove its access, so that I stay in control.
+
 ## Implementation Decisions
 
 **Modules.** Four, in two layers (ADR-005):
@@ -267,7 +273,10 @@ Streaming service port has no remove or reorder operation (N1).
 **Recorded answers:** real Spotify search results for the sample Songs and
 the quality set, saved once through the real adapter by a small recording
 command and stored next to the tests. The fake fails loudly on a query it
-has no recording for.
+has no recording for. The repository is public, so recordings and the
+quality set are trimmed to what the tests need (see "Test data in the
+repository" in `constraints.md`); whether Spotify's developer terms allow
+committing them is checked in US-05's plan.
 
 **Where mocks could hide failures:** Spotify's real ranking and catalogue
 (recordings go stale), the real browser login, Spotify's real rate limiting,

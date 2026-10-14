@@ -17,11 +17,12 @@ story; full stories below. Open and future work lives in `../open_threads.md`.
 | US-08 | List the Unmatched Songs | 4 Fill the Playlist | 🔲 draft | |
 | US-09 | Later Sessions | 5 Keep it going | 🔲 draft | |
 | US-10 | Rate limits and failures | 5 Keep it going | 🔲 draft | |
+| US-11 | README and install guide | 6 Share it | 🔲 draft | |
 
 Spec: 🔲 draft · ✅ ready (reviewed and merged; may be built) · ⏸ parked.
 "Built by" names the issue whose pull request was merged (`#12`).
 
-Feature spec for all ten: `features/lazer-to-spotify/spec.md`.
+Feature spec for all eleven: `features/lazer-to-spotify/spec.md`.
 
 ## How to write a story
 
@@ -208,6 +209,8 @@ The automated tests use recorded Spotify answers.
   match**, and each of the 154 Songs is matched to the same Track as
   before, as a Certain or Doubtful match. Automated test on recorded
   answers. By hand: on the owner's library, fewer than 132 Unmatched Songs.
+  The quality set holds only artist, title, Beatmapset id and Spotify Track
+  id per Song (see "Test data in the repository" in `constraints.md`).
 
 Out of scope: adding anything to the Playlist (US-06, US-07); searching
 again in later Sessions (US-09).
@@ -335,3 +338,30 @@ calmly** so that **I never lose work and never wonder whether it froze**.
 - **US-10.6** (N3) No message in this story shows a token.
 
 Out of scope: running in the background or on a schedule.
+
+### US-11 — README and install guide
+As a **Player**, I want **a README that takes me from nothing to a filled
+Playlist** so that **I can use osu-fy without asking the owner for help**.
+
+- **US-11.1** Given a Windows PC with lazer and a Spotify account but
+  without uv or osu-fy, when a Player follows only the root `README.md`,
+  then they install uv, install osu-fy with one command, start it with
+  `osu-fy` and reach a filled Playlist without any other help. (Check: the
+  owner on a fresh Windows user account, or a friend.)
+- **US-11.2** The README's Spotify steps match osu-fy's own setup guide
+  (US-03.1) word for word in the values that matter: the dashboard link and
+  the redirect URI `http://127.0.0.1:8765/callback`. It names the
+  alternative of being added to someone else's app, and Spotify's limits
+  (5 users per app, the app owner needs Premium).
+- **US-11.3** The README says what osu-fy stores and where
+  (`%APPDATA%\osu-fy`), how to start over (delete that folder), how to
+  remove osu-fy's access to Spotify (spotify.com/account/apps), and what it
+  never does: remove or reorder Tracks (N1), change the osu! install (N2),
+  contact anything but Spotify (N4).
+- **US-11.4** The README names the known limitation: Beatmapsets deleted in
+  lazer are still found until lazer next starts (ADR-006).
+- **US-11.5** The README shows how to update (`uv tool upgrade osu-fy`) and
+  uninstall (`uv tool uninstall osu-fy`), and both commands work as shown.
+
+Out of scope: developer documentation (`app/README.md`, kept current by each
+issue that builds).
