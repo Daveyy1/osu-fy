@@ -7,7 +7,7 @@ story; full stories below. Open and future work lives in `../open_threads.md`.
 
 | ID | Title | Epic | Spec | Built by |
 |----|-------|------|------|----------|
-| US-01 | Find the lazer folder | 1 Read lazer | 🔲 draft | |
+| US-01 | Find the lazer folder | 1 Read lazer | ✅ ready | #5 |
 | US-02 | Read Songs from lazer | 1 Read lazer | 🔲 draft | |
 | US-03 | Connect to Spotify | 2 Spotify | 🔲 draft | |
 | US-04 | Name and create the Playlist | 2 Spotify | 🔲 draft | |
@@ -65,21 +65,25 @@ As a **Player**, I want **osu-fy to find my lazer folder by itself** so that
 - **US-01.1** Given lazer's data is in the default folder `%APPDATA%\osu`
   (it contains a `files` folder) and a fresh start, when the Player starts
   osu-fy, then it shows that path and asks "Use this lazer folder? [Y/n]";
-  Enter or `y` accepts it.
+  Enter or `y` accepts it, and osu-fy shows "Reading lazer folder <path>".
 - **US-01.2** Given the Player moved lazer's data in lazer's settings, so
   `%APPDATA%\osu\storage.ini` names another folder that contains `files`,
   when osu-fy starts fresh, then it shows that other folder instead.
-  (Reach it by moving the data in lazer's settings, or by writing
-  `storage.ini` by hand. Its exact format is checked in the plan.)
+  If that folder has no `files`, osu-fy offers the default folder, as
+  lazer itself does. (Reach it by moving the data in lazer's settings, or
+  by writing `storage.ini` by hand with the line `FullPath = <folder>`.)
 - **US-01.3** Given no lazer folder is found, or the Player answers `n`,
   then osu-fy asks for the path; given a path without a `files` folder, it
   says "No lazer data found in <path>" and asks again, until the path is
-  right or the Player quits with `q`.
+  right or the Player quits with `q`. Quotes around a pasted path are
+  ignored.
 - **US-01.4** Given the Player confirmed a folder in an earlier Session,
   when they start osu-fy again, then it uses that folder without asking and
-  shows "Reading lazer folder <path>".
+  shows "Reading lazer folder <path>". If osu-fy's settings file cannot be
+  read, it stops with "Cannot read <path>: <reason>. Fix or delete it."
 - **US-01.5** Given the remembered folder no longer contains a `files`
-  folder, then osu-fy says so and asks as in US-01.1 to US-01.3.
+  folder, then osu-fy says "No lazer data found in <path>" and asks as in
+  US-01.1 to US-01.3.
 
 Out of scope: osu! stable; macOS and Linux folders (roadmap).
 
