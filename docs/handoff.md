@@ -6,13 +6,12 @@ short. It says where to continue, not what was done: the issues and pull
 requests are the record of that.*
 
 ## Resume here (the exact next step)
-1. The spec (PRs #1, #2) and ADR-004 to ADR-007 (accepted) are on `main`.
-   Branch `process/python-toolchain` sets up CI, the allowlist,
-   `.gitignore` and `LICENSE`; the owner reviews and merges its PR.
-2. `/to-tickets` on `docs/spec/features/lazer-to-spotify/spec.md`: propose
-   one issue per story, US-01 to US-11, and create them once approved.
-   Then `/plan` on US-01's issue in a work session
-   (`claude --settings .claude/work-settings.json`).
+1. The spec, ADR-004 to ADR-007 and the toolchain (PRs #1 to #3) are on
+   `main`. Issues #4 to #16 hold version one, one per ticket, with GitHub's
+   native "blocked by" links; `docs/spec/roadmap.md` maps them.
+2. Next: in a work session (`claude --settings .claude/work-settings.json`),
+   `/plan 4` (walking skeleton). Then the owner answers and sets
+   `plan-approved`, and `/build`.
 
 ## Settled in the interview (rounds 1 to 7), now written into `docs/spec/`
 - **What it is:** osu-fy turns the Songs a Player knows from osu! into a
