@@ -1,6 +1,64 @@
-import pytest
+import shutil
+from pathlib import Path
 
-from osu_fy.core.songs import Beatmapset, song_key
+import pytest
+from scripted_player import ScriptedPlayer
+
+from osu_fy.adapters.lazer import LazerSource
+from osu_fy.core.songs import Beatmapset, read_songs, song_key
+
+SAMPLE = Path(__file__).parent / "sample-lazer"
+
+
+@pytest.fixture
+def sample(tmp_path: Path) -> Path:
+    """A copy of the sample lazer folder, so a failing N2 test harms no other test."""
+    return shutil.copytree(SAMPLE, tmp_path / "sample-lazer")
+
+
+def read(folder: Path, player: ScriptedPlayer) -> list[list[Beatmapset]]:
+    songs = read_songs(LazerSource(folder.parent), player, folder)
+    return [list(song.beatmapsets) for song in songs]
+
+
+def test_US_02_1_sample_folder_has_8_songs_in_9_beatmapsets(sample: Path) -> None:
+    player = ScriptedPlayer()
+
+    songs = read(sample, player)
+
+    assert player.shown == ["Found 8 Songs in 9 Beatmapsets"]
+    walk_this_way = [s for s in songs if s[0].title.startswith("Walk This Way!")]
+    assert sorted(b.online_id or 0 for b in walk_this_way[0]) == [914242, 1127002]
+
+
+def test_US_02_1_an_empty_lazer_folder_has_no_songs(tmp_path: Path) -> None:
+    (tmp_path / "files").mkdir()
+    player = ScriptedPlayer()
+
+    assert read(tmp_path, player) == []
+    assert player.shown == ["Found 0 Songs in 0 Beatmapsets"]
+
+
+def test_US_02_5_progress_counts_every_file_read(sample: Path) -> None:
+    player = ScriptedPlayer()
+
+    read(sample, player)
+
+    assert player.files_read == [(done, 10) for done in range(1, 11)]
+
+
+def listing(folder: Path) -> list[tuple[str, int, int]]:
+    return sorted(
+        (str(p), p.stat().st_size, p.stat().st_mtime_ns) for p in folder.rglob("*")
+    )
+
+
+def test_US_02_6_the_sample_folder_is_unchanged(sample: Path) -> None:
+    before = listing(sample)
+
+    read(sample, ScriptedPlayer())
+
+    assert listing(sample) == before
 
 
 def beatmapset(artist: str, title: str, artist_original: str = "") -> Beatmapset:

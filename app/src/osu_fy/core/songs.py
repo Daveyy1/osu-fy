@@ -2,6 +2,11 @@
 
 import unicodedata
 from dataclasses import dataclass
+from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:  # ports.py imports Beatmapset from here
+    from osu_fy.core.ports import Player, Source
 
 
 @dataclass(frozen=True)
@@ -11,6 +16,12 @@ class Beatmapset:
     artist_original: str
     title: str
     title_original: str
+
+
+@dataclass(frozen=True)
+class Song:
+    key: tuple[str, str]
+    beatmapsets: tuple[Beatmapset, ...]
 
 
 def _normal(text: str) -> str:
@@ -37,3 +48,13 @@ def song_key(beatmapset: Beatmapset) -> tuple[str, str]:
     for marker in CUT_MARKERS:
         title = title.replace(marker, " ")
     return _normal(beatmapset.artist or beatmapset.artist_original), _normal(title)
+
+
+def read_songs(source: "Source", player: "Player", folder: Path) -> list[Song]:
+    """The Session step that turns the lazer folder's Beatmapsets into Songs (US-02)."""
+    beatmapsets = source.read_beatmapsets(folder, player.show_files_read)
+    songs: dict[tuple[str, str], list[Beatmapset]] = {}
+    for beatmapset in beatmapsets:
+        songs.setdefault(song_key(beatmapset), []).append(beatmapset)
+    player.show_songs_found(len(songs), len(beatmapsets))
+    return [Song(key, tuple(sets)) for key, sets in songs.items()]
