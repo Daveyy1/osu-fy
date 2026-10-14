@@ -1,7 +1,7 @@
 # Secrets and local data — never commit
 .env
 .env.*
-data/
+/data/
 # spotipy's default token cache (ADR-004: osu-fy never uses it)
 .cache
 .cache-*
