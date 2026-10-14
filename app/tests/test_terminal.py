@@ -110,6 +110,5 @@ def test_US_01_3_and_01_4_messages_show_the_path_as_typed() -> None:
     player.show_reading_lazer_folder(Path(r"D:\[bold]osu"))
 
     assert console.export_text() == (
-        "No lazer data found in D:\\[old] osu\n"
-        "Reading lazer folder D:\\[bold]osu\n"
+        "No lazer data found in D:\\[old] osu\nReading lazer folder D:\\[bold]osu\n"
     )
