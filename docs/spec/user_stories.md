@@ -94,15 +94,20 @@ once**.
 
 - **US-02.1** Given the sample lazer folder, when osu-fy reads it, then it
   shows "Found 8 Songs in 9 Beatmapsets": the two Walk This Way!
-  Beatmapsets are one Song.
+  Beatmapsets are one Song. A lazer folder without Beatmapsets shows
+  "Found 0 Songs in 0 Beatmapsets" and osu-fy carries on.
 - **US-02.2** Given a Beatmapset with several difficulties (several `.osu`
   files with the same Beatmapset), then it counts as one Beatmapset.
+  Difficulties without a Beatmapset id are grouped by artist and title in
+  both scripts.
 - **US-02.3** Two Beatmapsets are the same Song when their artist and title
   are equal after ignoring case, full-width characters, extra spaces and
   cut markers: `(TV Size)`, `(TV Size Ver.)`, `(TV size ver.)`,
-  `(Cut Ver.)`, `(Short Ver.)`, `～TVサイズ～`. Version markers such as
-  `(Nightcore Mix)`, `(… Remix)` or `(Extended Mix)` are **not** ignored: a
-  Nightcore map and the original are two Songs.
+  `(Cut Ver.)`, `(Short Ver.)`, `～TVサイズ～`, `~TV Size~`. The romanised
+  artist and title are compared; the original script only when they are
+  empty. Version markers such as `(Nightcore Mix)`, `(… Remix)` or
+  `(Extended Mix)` are **not** ignored: a Nightcore map and the original are
+  two Songs.
 - **US-02.4** Given files in `files` that are not `.osu` files (audio,
   images, skin files), or a `.osu` file without artist or title, then they
   are skipped without an error message.
