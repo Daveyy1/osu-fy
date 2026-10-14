@@ -106,9 +106,12 @@ All commands run from the repository root.
   contracts, ADR-005).
 - **Mutation testing:** none for now.
 - **Dependency licences:** `uv run --directory app pip-licenses
-  --allow-only="MIT License;BSD License;Apache Software License;ISC License
-  (ISCL);Python Software Foundation License;Mozilla Public License 2.0 (MPL
-  2.0)"`. The exact licence strings are checked when CI is set up.
+  --from=mixed --partial-match --allow-only="MIT;BSD;Apache;ISC;PSF;Python
+  Software Foundation;MPL 2.0;MPL-2.0"`. Partial match, because packages
+  name the same licence differently (`MIT` and `MIT License`,
+  `BSD-3-Clause` and `BSD License`, `PSF-2.0`). Checked 2026-10-14 against
+  the agreed dependencies: all pass, and leaving MPL out fails on
+  `certifi`.
 - **Lint and types:** `uv run --directory app ruff check .`,
   `uv run --directory app ruff format --check .`,
   `uv run --directory app mypy`, no errors.

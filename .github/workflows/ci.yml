@@ -2,10 +2,10 @@
 # one of the three things a merge needs; the other two are the human's review
 # and the human's check in the running app (docs/process/workflow.md).
 #
-# The harness does not fix a stack, so the tests job is a placeholder: it
-# passes while there is no app/, and fails once app/ exists until it has been
-# replaced with the project's toolchain and test command ("Choosing the
-# stack" in docs/process/workflow.md).
+# The tests job runs the "Technical baseline" of docs/spec/constraints.md
+# (ADR-004, ADR-005) on Windows, osu-fy's first platform. It passes while
+# there is no app/, fails if app/ exists without app/pyproject.toml, and
+# otherwise runs lint, types, structure, tests and the licence check.
 #
 # The secret scan runs on pull requests, which is where every change to main
 # comes from, and on a manual run (Actions -> CI -> Run workflow), which scans
@@ -39,16 +39,49 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   tests:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
-      # Replace the step below with: toolchain setup (e.g. actions/setup-java,
-      # actions/setup-node), then the "Run every test" command and the
-      # end-to-end command from docs/spec/constraints.md.
-      - name: Tests are not set up yet
+      - name: Check that app/ is a Python project
+        id: app
+        shell: bash
         run: |
-          if [ -d app ]; then
-            echo "::error::app/ exists, but CI runs no tests. Replace this step with the project's toolchain and test commands (docs/process/workflow.md, 'Choosing the stack')."
+          if [ -d app ] && [ ! -f app/pyproject.toml ]; then
+            echo "::error::app/ exists but has no pyproject.toml (docs/spec/constraints.md, 'Technical baseline')."
             exit 1
           fi
-          echo "No app/ yet (spec or harness change). Nothing to test."
+          if [ -d app ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No app/ yet (spec or harness change). Nothing to test."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Set up uv
+        if: steps.app.outputs.present == 'true'
+        uses: astral-sh/setup-uv@v10.3.0  # no floating major tag exists; pin the release
+        with:
+          enable-cache: true
+          cache-dependency-glob: app/uv.lock
+      - name: Install the locked dependencies
+        if: steps.app.outputs.present == 'true'
+        run: uv sync --directory app --locked
+      # One command per step: on Windows a multi-line step only fails on the
+      # last command's exit code.
+      - name: Lint
+        if: steps.app.outputs.present == 'true'
+        run: uv run --directory app ruff check .
+      - name: Format
+        if: steps.app.outputs.present == 'true'
+        run: uv run --directory app ruff format --check .
+      - name: Types
+        if: steps.app.outputs.present == 'true'
+        run: uv run --directory app mypy
+      - name: Structure (import contracts, ADR-005)
+        if: steps.app.outputs.present == 'true'
+        run: uv run --directory app lint-imports
+      - name: Run every test
+        if: steps.app.outputs.present == 'true'
+        run: uv run --directory app pytest
+      - name: Dependency licences
+        if: steps.app.outputs.present == 'true'
+        run: uv run --directory app pip-licenses --from=mixed --partial-match --allow-only="MIT;BSD;Apache;ISC;PSF;Python Software Foundation;MPL 2.0;MPL-2.0"

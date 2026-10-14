@@ -6,13 +6,13 @@ short. It says where to continue, not what was done: the issues and pull
 requests are the record of that.*
 
 ## Resume here (the exact next step)
-1. The spec pack is on `main` (PR #1). Branch `spec/readme-and-quality-set`
-   adds US-11 (README), osu-fy's own root README and the test-data rule; in
-   its PR the owner sets ADR-004 to ADR-007 to `accepted` in the files
-   themselves (the index already says so), then merges.
-2. Then the `process/python-toolchain` PR (see `open_threads.md`).
-3. Then `/to-tickets` on `docs/spec/features/lazer-to-spotify/spec.md`, one
-   issue per story, US-01 first.
+1. The spec (PRs #1, #2) and ADR-004 to ADR-007 (accepted) are on `main`.
+   Branch `process/python-toolchain` sets up CI, the allowlist,
+   `.gitignore` and `LICENSE`; the owner reviews and merges its PR.
+2. `/to-tickets` on `docs/spec/features/lazer-to-spotify/spec.md`: propose
+   one issue per story, US-01 to US-11, and create them once approved.
+   Then `/plan` on US-01's issue in a work session
+   (`claude --settings .claude/work-settings.json`).
 
 ## Settled in the interview (rounds 1 to 7), now written into `docs/spec/`
 - **What it is:** osu-fy turns the Songs a Player knows from osu! into a

@@ -12,13 +12,6 @@ Remove an entry when it is done: the pull request is the record.
   (US-05); Doubtful threshold (US-05); `storage.ini` format (US-01).
 
 ## Spec pack
-- 🔲 A `process/python-toolchain` PR, before any `app/` code: CI with uv
-  and the baseline commands in `spec/constraints.md`, tests on
-  `windows-latest` (osu-fy is Windows-first); the command allowlist in
-  `.claude/work-settings.json`; Python entries in `.gitignore` (`.cache`,
-  `.cache-*`, `.venv/`, `__pycache__/`, tool caches) and the template's
-  Gradle and Node entries removed; a `LICENSE` file (MIT). Check the
-  licence strings of the pip-licenses command there.
 - 🔲 After the toolchain PR: `/to-tickets` on the feature spec, one issue
   per story, US-01 to US-11.
 - 🔲 Before US-05: the owner confirms about ten missed Songs (y/n) for the
@@ -26,12 +19,3 @@ Remove an entry when it is done: the pull request is the record.
 - 🔲 In US-05's plan: check whether Spotify's developer terms allow
   committing recorded API responses to a public repository
   (`spec/constraints.md`, "Test data in the repository").
-
-## Features — parked
-
-## Harness
-- 💡 A separate GitHub account or a fine-grained token for work sessions, so
-  the assistant cannot merge or approve even if it words around the deny
-  rules (ADR-003).
-- 💡 Turn on Claude Code's sandbox for work sessions where the platform
-  supports it (ADR-003).
