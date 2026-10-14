@@ -53,3 +53,7 @@ _Avoid_: Missing song, failed match
 **Review**:
 The step in which the Player decides which Doubtful matches go into the Playlist, all at once or one by one.
 _Avoid_: Confirmation, check
+
+**Session**:
+One use of osu-fy, from starting it to quitting: read the Songs, match the new ones, add the Certain matches, Review, list the Unmatched Songs.
+_Avoid_: Run, sync, pass

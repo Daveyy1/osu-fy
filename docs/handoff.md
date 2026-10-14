@@ -6,13 +6,13 @@ short. It says where to continue, not what was done: the issues and pull
 requests are the record of that.*
 
 ## Resume here (the exact next step)
-1. On branch `spec/initial-spec`: the interview is done (7 rounds, below).
-   The owner is reviewing the draft PR for this branch. Nothing from the
-   interview is in `docs/spec/` yet.
-2. When the interview is done: fill `docs/spec/`, then choose the stack
-   ("Choosing the stack" in `process/workflow.md`).
+1. On branch `spec/initial-spec`: the spec pack is drafted (`/to-spec`
+   done). The owner reviews draft PR #1; answer the review comments there.
+2. After the merge: the `process/` PR for CI and the allowlist, then
+   `/to-tickets` on `docs/spec/features/lazer-to-spotify/spec.md` (one
+   issue per story, US-01 first).
 
-## Settled in the interview (rounds 1 to 7), not yet in the spec
+## Settled in the interview (rounds 1 to 7), now written into `docs/spec/`
 - **What it is:** osu-fy turns the Songs a Player knows from osu! into a
   playlist on their Streaming service. Spotify first, others later.
 - **Who it is for:** the owner first, and friends who can handle a terminal
@@ -25,7 +25,7 @@ requests are the record of that.*
   tied to the osu! account.
 - **Uncertain matches:** only certain matches go into the playlist; the
   Player gets the doubtful and the unmatched Songs to look at.
-- **Re-runs:** the same playlist is appended to. osu-fy never removes.
+- **Later Sessions:** the same playlist is appended to. osu-fy never removes.
 - **Other services:** Apple Music and YouTube Music were named as ideas, not
   commitments. Whether their APIs allow it is unchecked.
 - **The old tool (`OsuSongParser`):** nothing is carried over unless the
@@ -40,12 +40,12 @@ requests are the record of that.*
 - **Review (rounds 3, 4):** Doubtful matches are decided inside osu-fy.
   osu-fy first lists them all; the Player then adds them all at once or goes
   through them one by one, and can add the remaining ones in one go at any
-  point. Unanswered ones wait for the next run; answers are remembered.
+  point. Unanswered ones wait for the next Session; answers are remembered.
 - **Memory (round 4):** kept in the Player's app-data folder. Only Songs new
-  since the last run are searched; a menu option searches the Unmatched
+  since the last Session are searched; a menu option searches the Unmatched
   Songs again. A "no" in the Review stays a no.
 - **Duplicates (round 4):** osu-fy reads the Playlist from Spotify on every
-  run and treats it as the truth.
+  Session and treats it as the truth.
 - **Song identity (round 4):** a TV Size or other cut and a different script
   are the same Song (Certain match). An extended mix is Doubtful. For a
   remix or Nightcore map, look for that exact version first; falling back
@@ -55,7 +55,7 @@ requests are the record of that.*
   2026-10-14). Lazer removes the files of deleted or replaced Beatmapsets
   and old versions of edited difficulties only when it next starts, so
   osu-fy may find Songs the Player deleted since then.
-- **Friends (round 4):** first-run setup guides the Player to register their
+- **Friends (round 4):** first-Session setup guides the Player to register their
   own Spotify app and paste its Client ID (PKCE, no secret). The repo ships
   no Client ID. The owner has Premium.
 - **Stack (rounds 4, 5):** Python 3.13, uv, pytest, ruff, a type checker, a
@@ -63,7 +63,7 @@ requests are the record of that.*
   February 2026 endpoints) with its token cache replaced so tokens live in
   the app-data folder, never in the working directory. Spotify sits behind
   one port. Needs an ADR.
-- **First run (round 5):** Certain matches are added as soon as the search
+- **First Session (round 5):** Certain matches are added as soon as the search
   ends, before the Review, with their count shown.
 - **Lazer folder (round 5):** default `%APPDATA%\osu`, follow `storage.ini`
   if the Player moved it, show the path to confirm, ask only if nothing is
@@ -73,16 +73,16 @@ requests are the record of that.*
   per Song; osu-fy prints the path.
 - **Failures (round 5):** expired login refreshes silently, else the browser
   opens again; Spotify unreachable stops with a clear message and the next
-  run continues. Rate limits: the old project once got a day-long block, so
+  Session continues. Rate limits: the old project once got a day-long block, so
   pacing matters. Old pacing: at most 30 requests per sliding 30 s and at
   least 1 s between requests.
 - **Pacing (round 6):** keep the old pacing (about 1 request a second) and
-  make fewer requests: one search per Song, never again on re-runs, stop at
+  make fewer requests: one search per Song, never again in later Sessions, stop at
   the first Certain match, add in batches of 100. spotipy's silent 429 retry
   is off: a short wait (up to about 2 minutes) shows a countdown and
   continues; a longer one stops, keeps the progress and says until when.
   The search shows a progress bar counting the Songs done, so the app never
-  looks frozen. About 10 minutes for a first run of 300 Songs is fine.
+  looks frozen. About 10 minutes for a first Session of 300 Songs is fine.
 - **Platform (round 6):** Windows first; folder lookups written so macOS and
   Linux are one small issue each later.
 - **Install (round 6):** `uv tool install git+https://github.com/Daveyy1/osu-fy`,
@@ -95,12 +95,12 @@ requests are the record of that.*
   telemetry, no server of its own; English only.
 - **Players (round 5):** one Player and one Playlist per Windows user
   account in version one.
-- **Playlist (round 3):** the Player names it on the first run; private by
+- **Playlist (round 3):** the Player names it in the first Session; private by
   default.
 - **Non-negotiables (round 3), all confirmed:** never delete or reorder in
   a Playlist; only read the osu! install; keys and tokens never printed,
   logged or committed; nothing about the Player goes anywhere but osu! and
-  the Streaming service; a Track is never added twice, also across re-runs.
+  the Streaming service; a Track is never added twice, also across Sessions.
 - **Facts checked 2026-10-14:** Spotify development mode allows 5 users per
   app and the app owner needs Premium; search returns at most 10 results;
   new endpoints `POST /me/playlists` and `/playlists/{id}/items`; PKCE with
@@ -115,10 +115,10 @@ requests are the record of that.*
   154 kept, fewer Unmatched Songs than 132 on the same library. Assumed: no
   wrong Track known in the old Playlist (owner did not name any).
 
-## Proposed ADRs (when filling the spec)
-Stack (Python, uv, spotipy with its token cache moved); reading lazer by
-walking `files/` instead of its realm database; each Player registers their
-own Spotify app, no Client ID shipped.
+## ADRs from the interview
+Written as ADR-004 (stack), ADR-005 (structure checks), ADR-006 (lazer file
+store) and ADR-007 (own Spotify app per Player), all `proposed` until the
+owner merges PR #1.
 
 ## Open decisions
 See `open_threads.md`.
