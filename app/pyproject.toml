@@ -1,0 +1,55 @@
+[project]
+name = "osu-fy"
+version = "0.1.0"
+description = "Turns the Songs you have installed in osu!lazer into a private Spotify Playlist."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.13"
+dependencies = [
+    "rapidfuzz",
+    "readchar",
+    "rich",
+    "spotipy>=2.26",
+]
+
+[project.scripts]
+osu-fy = "osu_fy.__main__:main"
+
+[dependency-groups]
+dev = [
+    "import-linter",
+    "mypy",
+    "pip-licenses",
+    "pytest",
+    "ruff",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.1,<0.14"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.mypy]
+strict = true
+files = ["src", "tests"]
+
+[tool.ruff.lint]
+extend-select = ["I", "B", "UP"]
+
+# ADR-005: the core imports no adapter, UI, spotipy, rich or readchar.
+[tool.importlinter]
+root_package = "osu_fy"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "The core imports no adapter, UI, Spotify or terminal library"
+type = "forbidden"
+source_modules = ["osu_fy.core"]
+forbidden_modules = ["osu_fy.adapters", "osu_fy.ui", "spotipy", "rich", "readchar"]
+
+[[tool.importlinter.contracts]]
+name = "The adapters and the UI do not import each other"
+type = "independence"
+modules = ["osu_fy.adapters", "osu_fy.ui"]
