@@ -8,7 +8,7 @@ story; full stories below. Open and future work lives in `../open_threads.md`.
 | ID | Title | Epic | Spec | Built by |
 |----|-------|------|------|----------|
 | US-01 | Find the lazer folder | 1 Read lazer | ✅ ready | #5 |
-| US-02 | Read Songs from lazer | 1 Read lazer | 🔲 draft | |
+| US-02 | Read Songs from lazer | 1 Read lazer | ✅ ready | #6 |
 | US-03 | Connect to Spotify | 2 Spotify | 🔲 draft | |
 | US-04 | Name and create the Playlist | 2 Spotify | 🔲 draft | |
 | US-05 | Match Songs to Tracks | 3 Matching | 🔲 draft | |
