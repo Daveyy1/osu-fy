@@ -10,6 +10,10 @@ them.
 | [001](001-reviewed-generation.md) | Reviewed generation: a human approves the plan and the code | process | accepted |
 | [002](002-branch-and-work-model.md) | Branch and work model: issue, branch, pull request | process | accepted |
 | [003](003-work-permissions.md) | Work permissions: auto mode plus a versioned allowlist | process | accepted |
+| [004](004-stack.md) | Stack: Python 3.13 with uv, spotipy behind a port | product | accepted |
+| [005](005-structure-checks.md) | Structure: a core with ports, checked by the build | product | accepted |
+| [006](006-read-lazer-file-store.md) | Read lazer through its file store, not its realm database | product | accepted |
+| [007](007-own-spotify-app-per-player.md) | Each Player registers their own Spotify app | product | accepted |
 
 The harness ships only process decisions. A project's first product ADRs
 record its stack and how its structure is checked ("Choosing the stack" in
