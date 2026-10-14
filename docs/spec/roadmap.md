@@ -20,6 +20,7 @@ app that starts and does a little more than before.
 | 8 | List the Unmatched Songs | US-08 | 5 | |
 | 9 | Later Sessions | US-09 | 6, 7, 8 | |
 | 10 | Rate limits and failures | US-10 | 5, 9 | |
+| 11 | README and install guide | US-11 | 1 to 10 | |
 
 ## Later (not specified yet)
 

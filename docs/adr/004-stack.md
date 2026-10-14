@@ -1,6 +1,6 @@
 # ADR-004 — Stack: Python 3.13 with uv, spotipy behind a port
 
-*Status: proposed · Date: 2026-10-14*
+*Status: accepted · Date: 2026-10-14*
 
 ## Context
 osu-fy is a terminal app for Windows that reads files from the lazer folder,

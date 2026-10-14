@@ -45,6 +45,15 @@ of remaining prose intention.*
 - `.gitignore` excludes `.cache`, `.cache-*`, `.env` and the app-data
   folder's file names; the secret scan in CI runs on every PR.
 - The osu! install is opened read only (N2).
+- **Test data in the repository.** The repository is public. The matching
+  quality set and the recorded Spotify answers hold only what the tests
+  need: artist, title, Beatmapset id, Spotify Track id, and for recordings
+  the Track fields of the port (title, artists, album, length). No playlist
+  ids, no account or profile data, no tokens, no request headers. Whether
+  Spotify's developer terms allow committing recorded responses is checked
+  in US-05's plan; if they do not, the recordings and the quality set move
+  to a git-ignored local folder and the tests that need them are skipped
+  when it is absent.
 - GDPR: osu-fy processes the Player's own data on the Player's own machine
   and sends it only to Spotify at the Player's request. No further duties
   for a tool without a server.

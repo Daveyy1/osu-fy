@@ -26,11 +26,13 @@ against.
 In the repository:
 
 ```
+README.md              what the app is, for visitors and Players
 CLAUDE.md              rules Claude follows in this repo (read automatically)
 CONTEXT.md             glossary of domain terms (written by /grill-with-docs)
 app/                   the code (appears with the first issue that builds)
 docs/
   process/workflow.md  this file
+  process/harness.md   the harness: what it is, how to start a project with it
   spec/                THE SPEC PACK: what Claude builds from
     vision.md            what the app is, for whom, why
     persona.md           the user and the non-negotiables
@@ -273,3 +275,6 @@ So the reviewer can spend attention where it matters:
   GitHub provides and had to be learned first, and a local hook can be
   skipped. The cost: the plan and review record live on GitHub, not in the
   repository, and the harness no longer works without GitHub.
+- **v2.1 (2026-10-14)** — the root `README.md` describes the app, not the
+  harness; the harness overview moved to `docs/process/harness.md`. Why: the
+  repository is public, and its front page should say what the app is.

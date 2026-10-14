@@ -1,78 +1,45 @@
-# AI code harness
+# osu-fy
 
-A starting point for projects where an AI assistant writes most of the code
-and **a human engineer approves the plan before it is built and reviews the
-code before it is merged**.
+Turns the songs you have installed in **osu!lazer** into a private
+**Spotify** playlist.
 
-Specs drive the work, and the work is tracked the usual GitHub way: an
-issue, a branch, a pull request.
+> **Status: in development.** Nothing to install yet. The install guide
+> arrives with story US-11, at the end of version one.
 
-```
-spec PR ──► issue ──► /plan N ──► you answer, label plan-approved ──► /build ──► draft pull request
-                                                                                      │
-                               merge ◄── you check the app ◄── you review ◄──────────┘
-                                                                   │  ▲
-                                                                   ▼  │
-                                                     /address-review, or you edit
-```
+## What it will do
 
-**Start here:** [`docs/process/workflow.md`](docs/process/workflow.md) (how it
-works) · [`docs/adr/001-reviewed-generation.md`](docs/adr/001-reviewed-generation.md)
-(why) · [`docs/handoff.md`](docs/handoff.md) (the next step).
+1. Find your lazer folder and read the beatmapsets installed there. It
+   never changes anything in your osu! install.
+2. Search Spotify for each song: TV Size cuts, Japanese or romanised titles,
+   and the exact remix or Nightcore version where Spotify has it.
+3. Add every certain match to one private playlist, which you name. osu-fy
+   only ever adds; it never removes or reorders anything.
+4. Show the doubtful matches in one table: add them all, decide one key
+   press at a time, or leave them for later.
+5. List the songs it could not find, with links that make adding one by
+   hand a click.
 
-## Using it for a project
+Run it again after downloading new maps: it only searches what is new.
 
-This repo is a GitHub template: each project gets its own copy and changes
-it freely.
+You will need Windows, [uv](https://docs.astral.sh/uv/), and a Spotify
+account. You also register your own free Spotify developer app; osu-fy walks
+you through it. Spotify currently requires Premium for the app's owner.
 
-1. On GitHub choose "Use this template", then clone the new repository.
-2. Protect `main` and create the approval label. A template passes on
-   neither, so run this once per repository:
-   ```
-   gh api -X PUT "repos/{owner}/{repo}/branches/main/protection" --input .github/branch-protection.json
-   gh label create plan-approved --description "The human approved the plan on this issue" --color 0E8A16
-   ```
-   Branch protection on a private repository needs GitHub Pro (free with the
-   Student Developer Pack) or a public repository.
-3. Read the ADRs in `docs/adr/`.
-4. On a `spec/<topic>` branch, run `/grill-with-docs` and describe the idea.
-   Fill `docs/spec/`. Merge the PR.
-5. Choose the stack: the harness fixes none. An ADR, the "Technical
-   baseline" in `docs/spec/constraints.md`, then CI and the command allowlist
-   ("Choosing the stack" in the workflow).
-6. Open an issue with the "Work item" form, then
-   `claude --settings .claude/work-settings.json` and `/plan <issue number>`.
+## How it is built
 
-## Layout
+The specification comes first, an AI assistant writes most of the code,
+and a human reviews every plan and every line before it reaches `main`.
 
-| Path | What's in it |
-|------|--------------|
-| `CLAUDE.md` | The working agreement: rules the assistant follows (read automatically) |
-| `CONTEXT.md` | Glossary of domain terms |
-| `docs/process/workflow.md` | How the work goes, phase by phase |
-| `docs/spec/` | The spec pack, as skeletons to fill |
-| `docs/adr/` | Decisions, each with a `Revisit if:` trigger |
-| `docs/templates/` | ADR, sensor report |
-| `docs/handoff.md`, `docs/open_threads.md` | The next step; what is open |
-| `app/` | The code. Created by the first issue that builds |
-| `.claude/commands/` | `/plan`, `/build`, `/address-review`, `/sensor` |
-| `.claude/skills/` | `/grill-with-docs`, `/grill-me`, `/to-spec`, `/to-tickets`, `/tdd`, … |
-| `.claude/work-settings.json` | Permissions for work sessions (ADR-003) |
-| `.github/` | Issue form, PR template, CI, CODEOWNERS, `branch-protection.json` |
+- What osu-fy is and does not do: [`docs/spec/vision.md`](docs/spec/vision.md)
+- The stories and their acceptance criteria:
+  [`docs/spec/user_stories.md`](docs/spec/user_stories.md)
+- Build order: [`docs/spec/roadmap.md`](docs/spec/roadmap.md)
+- Decisions: [`docs/adr/`](docs/adr/README.md)
+- How the work is done: [`docs/process/workflow.md`](docs/process/workflow.md)
+  and [`docs/process/harness.md`](docs/process/harness.md)
 
-There are no scripts: issues, branches, pull requests, labels and branch
-protection are GitHub's own.
+## Licence
 
-## Requirements
-
-- **A GitHub repository** on a plan with branch protection, and the **GitHub
-  CLI**, logged in (`gh auth status`).
-- **Claude Code**. The work permissions use auto mode; if the account does
-  not have it, change `defaultMode` in `.claude/work-settings.json`.
-- Whatever the project's stack needs. The harness itself needs nothing else.
-
-## Third-party material
-
-The skills in `.claude/skills/` are from
+MIT. The skills in `.claude/skills/` are from
 [mattpocock/skills](https://github.com/mattpocock/skills), MIT
 (`.claude/skills/LICENSE-mattpocock-skills`).

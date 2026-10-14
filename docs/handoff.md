@@ -6,11 +6,13 @@ short. It says where to continue, not what was done: the issues and pull
 requests are the record of that.*
 
 ## Resume here (the exact next step)
-1. On branch `spec/initial-spec`: the spec pack is drafted (`/to-spec`
-   done). The owner reviews draft PR #1; answer the review comments there.
-2. After the merge: the `process/` PR for CI and the allowlist, then
-   `/to-tickets` on `docs/spec/features/lazer-to-spotify/spec.md` (one
-   issue per story, US-01 first).
+1. The spec pack is on `main` (PR #1). Branch `spec/readme-and-quality-set`
+   adds US-11 (README), osu-fy's own root README and the test-data rule; in
+   its PR the owner sets ADR-004 to ADR-007 to `accepted` in the files
+   themselves (the index already says so), then merges.
+2. Then the `process/python-toolchain` PR (see `open_threads.md`).
+3. Then `/to-tickets` on `docs/spec/features/lazer-to-spotify/spec.md`, one
+   issue per story, US-01 first.
 
 ## Settled in the interview (rounds 1 to 7), now written into `docs/spec/`
 - **What it is:** osu-fy turns the Songs a Player knows from osu! into a
@@ -129,6 +131,5 @@ See `open_threads.md`.
   the app's access and removing the file is their call.
 - `/plan`, `/build`, `/address-review`, `/grill-me`, `/grill-with-docs`,
   `/to-spec` and `/to-tickets` only run when typed.
-- A draft PR is open for `spec/initial-spec` (opened 2026-10-14, at the
-  owner's request, after the interview). Filling `docs/spec/` adds to the
-  same PR; do not force-push it.
+- Only the owner sets an ADR to `accepted`. On 2026-10-14 the index said
+  `accepted` while the ADR files still said `proposed`; keep both in step.

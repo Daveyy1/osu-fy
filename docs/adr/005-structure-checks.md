@@ -1,6 +1,6 @@
 # ADR-005 — Structure: a core with ports, checked by the build
 
-*Status: proposed · Date: 2026-10-14*
+*Status: accepted · Date: 2026-10-14*
 
 ## Context
 The owner wants the logic separate from the interface, so that a GUI or web

@@ -1,6 +1,6 @@
 # ADR-006 — Read lazer through its file store, not its realm database
 
-*Status: proposed · Date: 2026-10-14*
+*Status: accepted · Date: 2026-10-14*
 
 ## Context
 osu!lazer stores every file under `files/<h>/<hh>/<sha256>`. Only its realm

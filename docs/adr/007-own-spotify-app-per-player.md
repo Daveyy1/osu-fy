@@ -1,6 +1,6 @@
 # ADR-007 — Each Player registers their own Spotify app
 
-*Status: proposed · Date: 2026-10-14*
+*Status: accepted · Date: 2026-10-14*
 
 ## Context
 Spotify's Web API needs a registered app. Since February 2026 an app in
