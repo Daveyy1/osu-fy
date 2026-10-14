@@ -9,8 +9,7 @@ requests are the record of that.*
 1. The spec (PRs #1, #2) and ADR-004 to ADR-007 (accepted) are on `main`.
    Branch `process/python-toolchain` sets up CI, the allowlist,
    `.gitignore` and `LICENSE`; the owner reviews and merges its PR.
-2. The owner installs uv locally (`winget install astral-sh.uv`).
-3. `/to-tickets` on `docs/spec/features/lazer-to-spotify/spec.md`: propose
+2. `/to-tickets` on `docs/spec/features/lazer-to-spotify/spec.md`: propose
    one issue per story, US-01 to US-11, and create them once approved.
    Then `/plan` on US-01's issue in a work session
    (`claude --settings .claude/work-settings.json`).
