@@ -9,7 +9,7 @@ story; full stories below. Open and future work lives in `../open_threads.md`.
 |----|-------|------|------|----------|
 | US-01 | Find the lazer folder | 1 Read lazer | ✅ ready | #5 |
 | US-02 | Read Songs from lazer | 1 Read lazer | ✅ ready | #6 |
-| US-03 | Connect to Spotify | 2 Spotify | 🔲 draft | |
+| US-03 | Connect to Spotify | 2 Spotify | ✅ ready | #7 |
 | US-04 | Name and create the Playlist | 2 Spotify | 🔲 draft | |
 | US-05 | Match Songs to Tracks | 3 Matching | 🔲 draft | |
 | US-06 | Add Certain matches | 4 Fill the Playlist | 🔲 draft | |
@@ -140,9 +140,20 @@ else's keys**.
 - **US-03.3** Given a valid Client ID, then osu-fy opens the browser on
   Spotify's login page; after the Player agrees, the terminal shows
   "Logged in to Spotify as <display name>".
-- **US-03.4** Given the Player closes the browser tab or refuses access,
-  then after at most 3 minutes osu-fy says the login did not complete and
-  offers "Try again [t] or quit [q]". The Client ID stays saved.
+- **US-03.4** While osu-fy waits for the browser, it shows "Waiting for the
+  login in your browser… press t to try again, c for another Client ID, q
+  to quit". Given the Player refuses access, closes the browser tab or
+  presses t, c or q, then osu-fy says "The login did not complete." and
+  offers "Try again [t], enter another Client ID [c] or quit [q]": after a
+  refusal at once, after a closed tab after at most 3 minutes, and a key
+  pressed while waiting counts as the answer. `c` asks for the Client ID as
+  in US-03.2. The Client ID stays saved.
+- **US-03.8** Given Spotify cannot be reached during the login (disconnect
+  the network first), then osu-fy stops with "Can't reach Spotify.
+  Everything found so far is kept; try again later."; given port 8765 is
+  in use (start a second osu-fy while the first waits for the browser),
+  it stops with "Port 8765 is in use; is osu-fy already running?". No
+  Python traceback in either case. (US-10.5 adds the retry.)
 - **US-03.5** Given a saved login, when the Player starts osu-fy again, then
   no browser opens and the terminal shows "Logged in to Spotify as
   <display name>".

@@ -4,6 +4,7 @@ import pytest
 import readchar
 
 from osu_fy.__main__ import main
+from osu_fy.core.ports import StreamingServiceUnavailable
 
 
 @pytest.fixture(autouse=True)
@@ -45,3 +46,20 @@ def test_US_01_4_unreadable_settings_stop_with_a_message(
     out = capsys.readouterr().out
     assert f"Cannot read {settings}: " in out.replace("\n", "")
     assert "Fix or delete it." in out
+
+
+def test_US_03_8_a_stop_shows_its_message_without_a_traceback(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    def unreachable(*args: object) -> None:
+        raise StreamingServiceUnavailable(
+            "Can't reach Spotify. Everything found so far is kept; try again later."
+        )
+
+    monkeypatch.setattr("osu_fy.__main__.run_session", unreachable)
+
+    main()  # returns instead of raising
+
+    assert capsys.readouterr().out == (
+        "Can't reach Spotify. Everything found so far is kept; try again later.\n"
+    )

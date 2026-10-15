@@ -31,8 +31,11 @@ file, so name the exact operations and data it needs.*
 - **Port (what the app needs, in domain terms):** the Streaming service
   port has exactly these operations. It has no operation that removes or
   reorders (N1).
-  - `log_in() → Player name`: completes the login, opening the browser
-    only when no usable token is stored.
+  - `log_in(client_id, keep_waiting) → Player name`: completes the login,
+    opening the browser only when no usable token is stored. While it
+    waits for the browser it calls `keep_waiting(login_url)` about once a
+    second (`login_url` is set only when no browser could be opened) and
+    gives up when that returns false or after 3 minutes.
   - `find_tracks(artist, title) → list[Track]`: at most 10 candidate
     Tracks for one query; each Track has id, title, artists, album and
     length.
