@@ -67,7 +67,8 @@ Spotify connection
 12. As a Player, I want to log in through my browser, so that I never give
     my Spotify password to osu-fy.
 13. As a Player, I want osu-fy to keep my login, so that later Sessions do
-    not open the browser.
+    not open the browser; it is refreshed at every start, so removing
+    osu-fy's access at spotify.com takes effect at the next start.
 14. As a Player, I want my tokens kept only in osu-fy's own folder, so that
     they never end up in a project folder or a repository.
 15. As a Player, I want osu-fy to talk to nothing but Spotify, so that
@@ -259,9 +260,9 @@ core does it. Each test name quotes its criterion ID (`US-05.4`).
    break (N1, N2 on the sample folder, N5).
 2. **The Spotify adapter**, against recorded HTTP responses and a fake
    clock: endpoints and bodies, pacing (US-05.9), 429 handling (US-05.11,
-   US-10.1, US-10.2), refresh (US-10.3), token file location and no token
-   in output (US-03.6), allowed hosts (US-03.7). No test waits in real
-   time.
+   US-10.1, US-10.2), refresh (US-03.5, US-10.3, US-10.4), token file
+   location and no token in output (US-03.6), allowed hosts (US-03.7). No
+   test waits in real time.
 3. **The terminal UI**, thin: key mapping in the Review (US-07.3) and that
    the Player port's questions reach the screen. Everything else in the UI
    is checked by hand.

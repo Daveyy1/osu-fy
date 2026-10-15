@@ -155,8 +155,10 @@ else's keys**.
   it stops with "Port 8765 is in use; is osu-fy already running?". No
   Python traceback in either case. (US-10.5 adds the retry.)
 - **US-03.5** Given a saved login, when the Player starts osu-fy again, then
-  no browser opens and the terminal shows "Logged in to Spotify as
-  <display name>".
+  osu-fy refreshes the login, no browser opens and the terminal shows
+  "Logged in to Spotify as <display name>". Refreshing at every start makes
+  removed access (US-10.4) take effect at the next start, not up to an hour
+  later.
 - **US-03.6** (N3) Given a completed login, then the tokens are stored only
   in osu-fy's token file in `%APPDATA%\osu-fy`: no file appears in the
   folder osu-fy was started from (no `.cache`), and no token text appears
@@ -166,7 +168,8 @@ else's keys**.
   test of the adapter's configuration, and in review.
 
 Out of scope: several Spotify accounts per Windows user; logging out (the
-Player removes access at spotify.com/account/apps).
+Player removes access at spotify.com/account/apps; osu-fy notices at the
+next start, US-03.5).
 
 ### US-04 — Name and create the Playlist
 As a **Player**, I want **to name my Playlist once and have osu-fy keep
@@ -345,12 +348,12 @@ calmly** so that **I never lose work and never wonder whether it froze**.
   osu-fy stops with "Spotify asks us to wait until <local date and time>.
   Everything found so far is kept." and the next Session continues as in
   US-09.5. Automated test only.
-- **US-10.3** Given the access token has expired (start osu-fy more than an
-  hour after the last login), then osu-fy refreshes it without a browser
+- **US-10.3** Given the access token expires during a Session (a Session
+  lasting more than an hour), then osu-fy refreshes it without a browser
   and without a message.
 - **US-10.4** Given the refresh fails (remove osu-fy's access at
-  spotify.com/account/apps first), then osu-fy opens the browser to log in
-  again and then continues.
+  spotify.com/account/apps, then start osu-fy), then osu-fy opens the
+  browser to log in again and then continues.
 - **US-10.5** Given Spotify cannot be reached (disconnect the network
   during the search), then after one retry osu-fy stops with "Can't reach
   Spotify. Everything found so far is kept; try again later." and no
