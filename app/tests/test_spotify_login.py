@@ -8,7 +8,8 @@ from scripted_player import ScriptedPlayer
 from osu_fy.core.ports import PlayerQuit, StreamingService
 from osu_fy.core.spotify_login import connect_to_spotify
 
-CLIENT_ID = "0123456789abcdef0123456789abcdef"  # made up: the repository ships no Client ID
+# made up: the repository ships no Client ID
+CLIENT_ID = "0123456789abcdef0123456789abcdef"
 OTHER_ID = "fedcba9876543210fedcba9876543210"
 WAITING = "Waiting for the login in your browser None"
 RETRY = "Try again [t], enter another Client ID [c] or quit [q]"
@@ -72,7 +73,9 @@ def test_US_03_2_upper_case_client_id_is_accepted_and_saved_in_lower_case(
     assert settings(tmp_path)["spotify_client_id"] == CLIENT_ID
 
 
-def test_US_03_2_the_client_id_is_saved_next_to_the_lazer_folder(tmp_path: Path) -> None:
+def test_US_03_2_the_client_id_is_saved_next_to_the_lazer_folder(
+    tmp_path: Path,
+) -> None:
     save(tmp_path, lazer_folder=r"C:\osu")
 
     connect_to_spotify(FakeStreaming("Kanon"), ScriptedPlayer(CLIENT_ID), tmp_path)
@@ -128,7 +131,9 @@ def test_US_03_4_t_pressed_while_waiting_tries_again_without_asking(
     assert streaming.client_ids == [CLIENT_ID, CLIENT_ID]
 
 
-@pytest.mark.parametrize("answers", [("c",), (None, "c")], ids=["while waiting", "after"])
+@pytest.mark.parametrize(
+    "answers", [("c",), (None, "c")], ids=["while waiting", "after"]
+)
 def test_US_03_4_c_asks_for_another_client_id_and_saves_it(
     tmp_path: Path, answers: tuple[str | None, ...]
 ) -> None:
@@ -148,7 +153,9 @@ def test_US_03_4_c_asks_for_another_client_id_and_saves_it(
     assert settings(tmp_path)["spotify_client_id"] == OTHER_ID
 
 
-@pytest.mark.parametrize("answers", [("q",), (None, "q")], ids=["while waiting", "after"])
+@pytest.mark.parametrize(
+    "answers", [("q",), (None, "q")], ids=["while waiting", "after"]
+)
 def test_US_03_4_q_quits_and_the_client_id_stays_saved(
     tmp_path: Path, answers: tuple[str | None, ...]
 ) -> None:

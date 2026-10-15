@@ -38,7 +38,9 @@ class TokenFile(CacheHandler):  # type: ignore[misc]  # spotipy has no type hint
 
     def get_cached_token(self) -> dict[str, Any] | None:
         try:
-            token = json.loads((self._app_data / "spotify-token.json").read_text("utf-8"))
+            token = json.loads(
+                (self._app_data / "spotify-token.json").read_text("utf-8")
+            )
         except (OSError, ValueError):
             return None  # no token, or an unreadable one: the Player logs in again
         return token if isinstance(token, dict) else None

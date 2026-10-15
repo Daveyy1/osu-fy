@@ -7,7 +7,9 @@ from osu_fy.core.settings import load_settings, save_settings
 CLIENT_ID = re.compile(r"[0-9a-f]{32}")
 
 
-def connect_to_spotify(streaming: StreamingService, player: Player, app_data: Path) -> None:
+def connect_to_spotify(
+    streaming: StreamingService, player: Player, app_data: Path
+) -> None:
     """The Session step that logs in to Spotify (US-03), asking for the Client ID once."""
     client_id = load_settings(app_data).get("spotify_client_id")
     if not isinstance(client_id, str):
@@ -31,7 +33,8 @@ def connect_to_spotify(streaming: StreamingService, player: Player, app_data: Pa
             return
         except LoginIncomplete:
             player.show_login_incomplete()
-        if (pressed or player.ask_login_retry()) == "c":  # a key pressed while waiting is the answer
+        # a key pressed while waiting is the answer
+        if (pressed or player.ask_login_retry()) == "c":
             client_id = _ask_client_id(player, app_data)
 
 
@@ -42,5 +45,6 @@ def _ask_client_id(player: Player, app_data: Path) -> str:
         client_id = player.ask_client_id().lower()
     settings = load_settings(app_data)
     settings["spotify_client_id"] = client_id
-    save_settings(app_data, settings)  # saved before the login, so it outlives a failed one
+    # saved before the login, so it outlives a failed one
+    save_settings(app_data, settings)
     return client_id

@@ -94,7 +94,9 @@ class Browser:
         }[self.answer]
         if query is not None:
             callback = f"http://127.0.0.1:8765/callback?{query}"
-            threading.Thread(target=lambda: urlopen(callback).read(), daemon=True).start()
+            threading.Thread(
+                target=lambda: urlopen(callback).read(), daemon=True
+            ).start()
         return self.opens
 
 
@@ -286,7 +288,8 @@ def test_US_03_6_tokens_are_kept_only_in_the_token_file(
     caplog.set_level(logging.DEBUG)
     app_data = tmp_path / "Roaming" / "osu-fy"
     save_token(app_data, ACCESS, expires_at=0)
-    session.refresh_refused = True  # refresh attempt, then a browser login: every token path
+    # a refresh attempt, then a browser login: every path a token takes
+    session.refresh_refused = True
 
     spotify(app_data, session).log_in(CLIENT_ID, keep_waiting)
 

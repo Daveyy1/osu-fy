@@ -17,6 +17,7 @@ class FakeStreaming:
         assert self.logins, "osu-fy logged in more often than the script answers"
         login = self.logins.pop(0)
         if isinstance(login, LoginIncomplete):
-            keep_waiting(None)  # the browser opened; then the Player stopped or Spotify refused
+            # the browser opened; then the Player stopped or Spotify refused
+            keep_waiting(None)
             raise login
         return login
