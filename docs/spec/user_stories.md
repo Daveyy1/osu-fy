@@ -168,7 +168,8 @@ else's keys**.
   test of the adapter's configuration, and in review.
 
 Out of scope: several Spotify accounts per Windows user; logging out (the
-Player removes access at spotify.com/account/apps).
+Player removes access at spotify.com/account/apps; osu-fy notices at the
+next start, US-03.5).
 
 ### US-04 — Name and create the Playlist
 As a **Player**, I want **to name my Playlist once and have osu-fy keep
