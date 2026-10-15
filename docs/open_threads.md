@@ -8,8 +8,8 @@ Remove an entry when it is done: the pull request is the record.
 
 ## Decisions needed
 - 🔲 Open questions left to the plans (feature spec, "Further Notes"):
-  Playlist deleted in Spotify (US-04); remaster suffix Certain or Doubtful
-  (US-05); Doubtful threshold (US-05); `storage.ini` format (US-01).
+  remaster suffix Certain or Doubtful (US-05); Doubtful threshold (US-05);
+  `storage.ini` format (US-01).
 
 ## Spec pack
 - 🔲 Before US-05b (#10): the owner confirms about ten missed Songs (y/n) for the

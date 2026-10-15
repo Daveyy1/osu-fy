@@ -194,7 +194,7 @@ Sharing
 - **Source:** "the lazer folder candidates" and "the Beatmapsets in this
   folder", with a progress callback.
 - **Streaming service:** `log_in`, `find_tracks`, `create_playlist`,
-  `tracks_in_playlist`, `append_tracks`, exactly as in
+  `find_playlist`, `tracks_in_playlist`, `append_tracks`, exactly as in
   `../../api_contracts.md`. No remove or reorder operation exists (N1).
 - **Player:** every question osu-fy asks (confirm folder, enter a path,
   Client ID, Playlist name, Review choices, the menu of a later Session) and
@@ -308,10 +308,6 @@ quality set.
 
 **Open questions for the plans** (the spec does not decide them; the plan
 of the named story asks the owner):
-- US-04: what osu-fy does when the Player deleted the Playlist in Spotify.
-  (Spotify keeps a "deleted" playlist and only unfollows it, so appending
-  may still work but nobody sees it.) Recommendation: detect it and offer
-  to create a new Playlist.
 - US-05: is a `- Remastered` or year-remaster suffix Certain or Doubtful?
   Recommendation: Certain, as it is the same recording.
 - US-05: the similarity threshold for Doubtful, fixed from the quality set.

@@ -176,19 +176,24 @@ As a **Player**, I want **to name my Playlist once and have osu-fy keep
 adding to it** so that **all my osu! Songs end up in one place**.
 
 - **US-04.1** Given a login and no Playlist yet, then osu-fy asks
-  "Name for your Playlist [osu!fy]:"; Enter accepts `osu!fy`. It creates a
-  **private** Playlist with that name and shows its name and link. (Check:
-  the Playlist appears in Spotify, marked private.)
+  "Name for your Playlist [osu!fy]:"; Enter, or a name of only spaces,
+  accepts `osu!fy`, and `q` quits. It creates a **private** Playlist with
+  that name and shows its name and link. (Check: the Playlist appears in
+  Spotify, marked private.)
 - **US-04.2** Given a Playlist created in an earlier Session, then osu-fy
   uses the same Playlist, found by its Spotify id even if the Player renamed
-  it in Spotify, and does not ask for a name.
+  it in Spotify, and does not ask for a name. It shows "Adding to your
+  Playlist <current name> <link>".
 - **US-04.3** Given the Player already has a playlist called `osu!fy` that
   osu-fy did not create, then osu-fy creates its own new Playlist and never
   touches the other one.
+- **US-04.4** Given the Player deleted the Playlist in Spotify (or logs in
+  with another Spotify account), then osu-fy says "Your Playlist is no
+  longer in your Spotify library." and asks for a name as in US-04.1. It
+  creates a new Playlist and uses it from then on.
 
 Out of scope: choosing an existing playlist to append to (later, if asked
-for); what happens if the Player deletes the Playlist in Spotify (open
-question in the feature spec).
+for).
 
 ### US-05 — Match Songs to Tracks
 As a **Player**, I want **osu-fy to find the Track for each Song and sort

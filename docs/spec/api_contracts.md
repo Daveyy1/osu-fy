@@ -41,6 +41,10 @@ file, so name the exact operations and data it needs.*
     length.
   - `create_playlist(name) → Playlist`: creates a private Playlist on the
     Player's account and returns its id, name and link.
+  - `find_playlist(id) → Playlist | None`: the Playlist with this id among
+    the playlists in the Player's library, with its current name and link;
+    none if it is not there (deleted in Spotify, which only unfollows it,
+    or another Spotify account).
   - `tracks_in_playlist(playlist) → set[Track id]`: every Track already in
     the Playlist, whoever added it.
   - `append_tracks(playlist, tracks)`: appends at the end, at most 100
@@ -50,7 +54,9 @@ file, so name the exact operations and data it needs.*
     `limit` is at most 10 since February 2026. Whether the `track:` and
     `artist:` filters behave as before was not confirmed; the first
     matching issue checks it against the real API.
-  - `POST /v1/me/playlists` with `{"name", "public": false, "description"}`.
+  - `POST /v1/me/playlists` with `{"name", "public": false, "description"}`;
+    the description is `Songs from osu!, added by osu-fy`.
+  - `GET /v1/me/playlists?limit=50&offset=…` for `find_playlist`.
     `POST /v1/users/{id}/playlists` no longer exists for new apps.
   - `GET /v1/playlists/{id}/items?limit=100&offset=…&fields=items(track(id)),next`.
   - `POST /v1/playlists/{id}/items` with `{"uris": [...]}`, at most 100
