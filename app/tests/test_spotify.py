@@ -13,7 +13,7 @@ import pytest
 import requests
 
 from osu_fy.adapters.spotify import Spotify
-from osu_fy.core.ports import LoginIncomplete, StreamingServiceUnavailable
+from osu_fy.core.ports import LoginIncomplete, Playlist, StreamingServiceUnavailable
 
 CLIENT_ID = "0123456789abcdef0123456789abcdef"  # made up
 ACCESS = "fake-access-token-7f3a9c"
@@ -22,6 +22,7 @@ NEW_ACCESS = "fake-access-token-refreshed-55d1"
 SCOPES = {"playlist-read-private", "playlist-modify-private", "playlist-modify-public"}
 TOKEN_URL = "https://accounts.spotify.com/api/token"
 ME_URL = "https://api.spotify.com/v1/me/"  # spotipy adds the slash
+PLAYLISTS_URL = "https://api.spotify.com/v1/me/playlists"
 
 
 def keep_waiting(login_url: str | None) -> bool:
@@ -29,12 +30,16 @@ def keep_waiting(login_url: str | None) -> bool:
 
 
 class FakeSpotifySession(requests.Session):
-    """Answers the token and /v1/me calls like Spotify, and records every request."""
+    """Answers the token, /v1/me and /v1/me/playlists calls like Spotify.
+
+    Records every request with what it sent: form data, a JSON body or the query.
+    """
 
     def __init__(self) -> None:
         super().__init__()
-        self.requests: list[tuple[str, str, dict[str, str]]] = []
+        self.requests: list[tuple[str, str, dict[str, Any]]] = []
         self.me: dict[str, Any] = {"display_name": "Kanon", "id": "kanon-id"}
+        self.library: list[dict[str, Any]] = []  # the Player's playlists, in order
         self.refresh_refused = False
         self.unreachable = False
 
@@ -43,7 +48,12 @@ class FakeSpotifySession(requests.Session):
     ) -> requests.Response:
         assert isinstance(method, str) and isinstance(url, str) and not args
         data = kwargs.get("data") or {}
-        self.requests.append((method, url, dict(data)))
+        if isinstance(data, str):
+            data = json.loads(data)  # spotipy sends API bodies as JSON text
+        query = {k: v[0] for k, v in parse_qs(urlparse(url).query).items()}
+        query |= {k: str(v) for k, v in (kwargs.get("params") or {}).items()}
+        url = url.split("?")[0]
+        self.requests.append((method, url, dict(data) or query))
         if self.unreachable:
             raise requests.ConnectionError("no network")
         if url == TOKEN_URL and data.get("grant_type") == "authorization_code":
@@ -54,7 +64,35 @@ class FakeSpotifySession(requests.Session):
             return answer(url, 200, token(NEW_ACCESS))
         if url == ME_URL:
             return answer(url, 200, self.me)
+        if method == "POST" and url == PLAYLISTS_URL:
+            created = spotify_playlist("new-id", data["name"])
+            self.library.insert(0, created)
+            return answer(url, 201, created)
+        if method == "GET" and url == PLAYLISTS_URL:
+            offset, limit = int(query.get("offset", 0)), int(query["limit"])
+            more = offset + limit < len(self.library)
+            return answer(
+                url,
+                200,
+                {
+                    "items": self.library[offset : offset + limit],
+                    "next": f"{url}?offset={offset + limit}&limit={limit}"
+                    if more
+                    else None,
+                },
+            )
         raise AssertionError(f"unexpected request {method} {url}")
+
+
+def spotify_playlist(playlist_id: str, name: str) -> dict[str, Any]:
+    """A playlist as Spotify describes it, trimmed to the fields osu-fy reads."""
+    return {
+        "id": playlist_id,
+        "name": name,
+        "external_urls": {
+            "spotify": f"https://open.spotify.com/playlist/{playlist_id}"
+        },
+    }
 
 
 def token(access: str, expires_in: int = 3600) -> dict[str, Any]:
@@ -132,6 +170,14 @@ def save_token(app_data: Path, access: str, expires_at: int) -> None:
     app_data.mkdir(parents=True, exist_ok=True)
     saved = token(access) | {"expires_at": expires_at}
     (app_data / "spotify-token.json").write_text(json.dumps(saved), encoding="utf-8")
+
+
+def logged_in(app_data: Path, session: FakeSpotifySession) -> Spotify:
+    save_token(app_data, ACCESS, expires_at=2**40)
+    adapter = spotify(app_data, session)
+    adapter.log_in(CLIENT_ID, keep_waiting)
+    session.requests.clear()
+    return adapter
 
 
 def saved_token(app_data: Path) -> dict[str, Any]:
@@ -340,3 +386,73 @@ def test_US_03_8_port_8765_in_use_stops_with_a_clear_message(
             spotify(tmp_path, session).log_in(CLIENT_ID, keep_waiting)
 
     assert str(stop.value) == "Port 8765 is in use; is osu-fy already running?"
+
+
+def test_US_04_1_creates_a_private_playlist_with_the_name_and_returns_its_link(
+    tmp_path: Path, no_browser: None, session: FakeSpotifySession
+) -> None:
+    playlist = logged_in(tmp_path, session).create_playlist("osu!fy")
+
+    assert playlist == Playlist(
+        "new-id", "osu!fy", "https://open.spotify.com/playlist/new-id"
+    )
+    [(method, url, body)] = session.requests
+    assert (method, url) == ("POST", PLAYLISTS_URL)
+    assert body["name"] == "osu!fy"
+    assert body["public"] is False  # spotipy's default is public
+    assert body["description"] == "Songs from osu!, added by osu-fy"
+
+
+def test_US_04_2_finds_the_playlist_by_id_on_a_later_page_with_its_current_name(
+    tmp_path: Path, no_browser: None, session: FakeSpotifySession
+) -> None:
+    session.library = [spotify_playlist(f"other-{n}", "osu!fy") for n in range(50)]
+    session.library.append(spotify_playlist("mine", "Renamed"))
+
+    found = logged_in(tmp_path, session).find_playlist("mine")
+
+    assert found == Playlist(
+        "mine", "Renamed", "https://open.spotify.com/playlist/mine"
+    )
+    assert session.requests == [
+        ("GET", PLAYLISTS_URL, {"limit": "50", "offset": "0"}),
+        ("GET", PLAYLISTS_URL, {"limit": "50", "offset": "50"}),
+    ]
+
+
+def test_US_04_4_a_playlist_in_no_page_of_the_library_is_not_found(
+    tmp_path: Path, no_browser: None, session: FakeSpotifySession
+) -> None:
+    session.library = [spotify_playlist(f"other-{n}", "x") for n in range(3)]
+
+    assert logged_in(tmp_path, session).find_playlist("gone") is None
+
+
+def test_US_03_7_the_playlist_calls_contact_only_api_spotify_com(
+    tmp_path: Path, no_browser: None, session: FakeSpotifySession
+) -> None:
+    adapter = logged_in(tmp_path, session)
+
+    adapter.find_playlist(adapter.create_playlist("osu!fy").id)
+
+    assert {urlparse(url).hostname for _, url, _ in session.requests} == {
+        "api.spotify.com"
+    }
+
+
+@pytest.mark.parametrize("call", ["create", "find"])
+def test_spotify_unreachable_at_the_playlist_stops_with_the_clear_message(
+    tmp_path: Path, no_browser: None, session: FakeSpotifySession, call: str
+) -> None:
+    adapter = logged_in(tmp_path, session)
+    session.unreachable = True
+
+    with pytest.raises(StreamingServiceUnavailable) as stop:
+        if call == "create":
+            adapter.create_playlist("osu!fy")
+        else:
+            adapter.find_playlist("mine")
+
+    assert str(stop.value) == (
+        "Can't reach Spotify. Everything found so far is kept; try again later."
+    )
