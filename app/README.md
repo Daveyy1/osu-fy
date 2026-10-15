@@ -61,7 +61,7 @@ in `tests/test_spotify.py`) is used only by the tests.
 | Login not completed (US-03.4) | In the browser, click "Cancel" on Spotify's page (refuse), or close the tab and wait 3 minutes, or press `t`, `c` or `q` while osu-fy waits. A wrong Client ID or redirect URI also ends here: Spotify shows an error page and never calls back. |
 | Saved login (US-03.5) | Start osu-fy again after a login. |
 | Expired login (US-10.3) | Start osu-fy more than an hour after the last login. |
-| Refresh refused (US-10.4) | Remove osu-fy's app at <https://www.spotify.com/account/apps/>, then start osu-fy. |
+| Refresh refused (US-10.4) | Remove osu-fy's app at <https://www.spotify.com/account/apps/>, then start osu-fy **more than an hour after the last login**. Sooner, Spotify still accepts the saved access token, so osu-fy never refreshes and logs in as usual. Quicker: after removing the app, set `"expires_at"` to `0` in `spotify-token.json`. |
 | Tokens only in the token file (US-03.6) | Start osu-fy from an empty folder (`cd` there, run `uv run --project <repo>\app osu-fy`); afterwards the folder is still empty, and `%APPDATA%\osu-fy` holds `settings.json` and `spotify-token.json`. |
 | Spotify unreachable (US-03.8) | Disconnect the network, then start osu-fy (with or without a saved login). |
 | Port 8765 in use (US-03.8) | Start a second osu-fy while the first waits for the browser. |
