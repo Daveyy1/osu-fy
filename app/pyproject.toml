@@ -35,6 +35,11 @@ testpaths = ["tests"]
 strict = true
 files = ["src", "tests"]
 
+# spotipy ships no type hints (#7, Q9); requests ships its own
+[[tool.mypy.overrides]]
+module = ["spotipy.*"]
+ignore_missing_imports = true
+
 [tool.ruff.lint]
 extend-select = ["I", "B", "UP"]
 

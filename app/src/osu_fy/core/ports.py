@@ -15,6 +15,10 @@ class LoginIncomplete(Exception):
     """The browser login was refused, abandoned or stopped by the Player (US-03.4)."""
 
 
+class StreamingServiceUnavailable(Exception):
+    """The Session stops and shows this message, without a traceback (US-03.8)."""
+
+
 class Player(Protocol):
     """Everything osu-fy shows the Player or asks them. The core never prints."""
 
