@@ -8,17 +8,18 @@ requests are the record of that.*
 ## Resume here (the exact next step)
 1. The spec, ADR-004 to ADR-007 and the toolchain (PRs #1 to #3) are on
    `main`, and so are the walking skeleton (#4, PR #18), US-01, find the
-   lazer folder (#5, PR #20), and US-02, read Songs from lazer (#6,
-   PR #22): Beatmapsets read from lazer's file store, the Song key, and
-   the sample lazer folder in `app/tests/sample-lazer/`. The Songs are not
-   kept between Sessions yet (US-05, US-09). Issues #7 to #16 hold the rest
-   of version one, one per ticket, with GitHub's native "blocked by" links;
-   `docs/spec/roadmap.md` maps them.
+   lazer folder (#5, PR #20), US-02, read Songs from lazer (#6, PR #22),
+   and US-03, connect to Spotify (#7, PR #24): the `StreamingService` port,
+   the Spotify adapter (PKCE, tokens in `%APPDATA%\osu-fy\spotify-token.json`)
+   and the login step after reading the Songs. PR #24 also built US-10.3 and
+   US-10.4 for the login only; #15 builds the rest of US-10. The Songs are
+   not kept between Sessions yet (US-05, US-09). Issues #8 to #16 hold the
+   rest of version one, one per ticket, with GitHub's native "blocked by"
+   links; `docs/spec/roadmap.md` maps them.
 2. Next: in a work session (`claude --settings .claude/work-settings.json`),
-   `/plan 7` (connect to Spotify, US-03). Then the owner answers and sets
-   `plan-approved`, and `/build`. Before the hand check of #7, the owner
-   creates a Spotify developer app with the redirect URI
-   `http://127.0.0.1:8765/callback` (roadmap: #7 is blocked by it).
+   `/plan 8` (name and create the Playlist, US-04). Then the owner answers
+   and sets `plan-approved`, and `/build`. The owner's Spotify developer
+   app exists and the login works on it.
 
 ## Settled in the interview (rounds 1 to 7), now written into `docs/spec/`
 - **What it is:** osu-fy turns the Songs a Player knows from osu! into a

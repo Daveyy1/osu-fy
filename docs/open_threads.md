@@ -10,6 +10,11 @@ Remove an entry when it is done: the pull request is the record.
 - 🔲 Open questions left to the plans (feature spec, "Further Notes"):
   Playlist deleted in Spotify (US-04); remaster suffix Certain or Doubtful
   (US-05); Doubtful threshold (US-05); `storage.ini` format (US-01).
+- 🔲 Refresh the Spotify token at every start? Today removing osu-fy's
+  access at spotify.com logs it out only once the saved access token
+  expires, up to an hour later. Refreshing at start makes it immediate for
+  one more request per Session, and changes US-03.5 and US-10.4. Asked on
+  PR #24, unanswered; the assistant recommended refreshing. Fits #15 (US-10).
 
 ## Spec pack
 - 🔲 Before US-05b (#10): the owner confirms about ten missed Songs (y/n) for the
