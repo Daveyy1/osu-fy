@@ -68,6 +68,8 @@ file, so name the exact operations and data it needs.*
     osu-fy shows a countdown and continues. If it is longer, the Session
     stops, keeps everything found so far, and tells the Player the local
     time from which to try again.
+  - **At start:** the saved login is always refreshed (US-03.5), so removed
+    access is noticed at once. A failed refresh is handled as below.
   - **401 (expired token):** refresh silently. If the refresh fails (for
     example the Player removed osu-fy's access), open the browser to log in
     again, then continue.
