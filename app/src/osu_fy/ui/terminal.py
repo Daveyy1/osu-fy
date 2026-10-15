@@ -7,7 +7,7 @@ import readchar
 from rich.console import Console
 from rich.progress import BarColumn, Progress, TextColumn
 
-from osu_fy.core.ports import PlayerQuit
+from osu_fy.core.ports import PlayerQuit, Playlist
 
 YES = (readchar.key.ENTER, "y", "Y")
 NO = ("n", "N")
@@ -124,6 +124,24 @@ class TerminalPlayer:
 
     def show_logged_in(self, name: str) -> None:
         self._say(f"Logged in to Spotify as {name}")
+
+    def ask_playlist_name(self, default: str) -> str:
+        # markup off: "[osu!fy]" is the default, not a style
+        typed = self._console.input(
+            f"Name for your Playlist [{default}]: ", markup=False
+        ).strip()
+        if typed in QUIT:
+            raise PlayerQuit
+        return typed or default
+
+    def show_playlist_created(self, playlist: Playlist) -> None:
+        self._say(f"Created your Playlist {playlist.name} {playlist.link}")
+
+    def show_playlist_in_use(self, playlist: Playlist) -> None:
+        self._say(f"Adding to your Playlist {playlist.name} {playlist.link}")
+
+    def show_playlist_gone(self) -> None:
+        self._say("Your Playlist is no longer in your Spotify library.")
 
     def _say(self, text: str, end: str = "\n") -> None:
         # A path prints as it is: "[old]" is no markup, and the terminal wraps it

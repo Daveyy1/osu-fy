@@ -6,7 +6,7 @@ import pytest
 import readchar
 from rich.console import Console
 
-from osu_fy.core.ports import PlayerQuit
+from osu_fy.core.ports import PlayerQuit, Playlist
 from osu_fy.ui.terminal import TerminalPlayer
 
 
@@ -67,7 +67,7 @@ def test_US_01_3_q_quits_the_y_n_prompt(
 
 
 def type_line(monkeypatch: pytest.MonkeyPatch, console: Console, line: str) -> None:
-    monkeypatch.setattr(console, "input", lambda prompt="": line)
+    monkeypatch.setattr(console, "input", lambda prompt="", **options: line)
 
 
 @pytest.mark.parametrize(
@@ -300,3 +300,50 @@ def test_US_03_4_q_quits_the_retry_offer(
 
     with pytest.raises(PlayerQuit):
         TerminalPlayer(Console()).ask_login_retry()
+
+
+@pytest.mark.parametrize("typed", ["", "   "])
+def test_US_04_1_the_name_question_reaches_the_screen_and_enter_means_osu_fy(
+    monkeypatch: pytest.MonkeyPatch, typed: str
+) -> None:
+    monkeypatch.setattr("builtins.input", lambda: typed)
+    console = Console(record=True, width=80)
+
+    assert TerminalPlayer(console).ask_playlist_name("osu!fy") == "osu!fy"
+    assert console.export_text() == "Name for your Playlist [osu!fy]: "
+
+
+def test_US_04_1_a_typed_name_loses_only_its_surrounding_spaces(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    console = Console()
+    type_line(monkeypatch, console, "  'Til [the] End  ")
+
+    assert TerminalPlayer(console).ask_playlist_name("osu!fy") == "'Til [the] End"
+
+
+@pytest.mark.parametrize("quit_key", ["q", "Q"])
+def test_US_04_1_q_quits_the_name_question(
+    monkeypatch: pytest.MonkeyPatch, quit_key: str
+) -> None:
+    console = Console()
+    type_line(monkeypatch, console, quit_key)
+
+    with pytest.raises(PlayerQuit):
+        TerminalPlayer(console).ask_playlist_name("osu!fy")
+
+
+def test_US_04_1_04_2_and_04_4_messages_reach_the_screen() -> None:
+    console = Console(record=True, width=200)
+    player = TerminalPlayer(console)
+    playlist = Playlist("pl", "[b]osu!fy", "https://open.spotify.com/playlist/pl")
+
+    player.show_playlist_created(playlist)
+    player.show_playlist_in_use(playlist)
+    player.show_playlist_gone()
+
+    assert console.export_text() == (
+        "Created your Playlist [b]osu!fy https://open.spotify.com/playlist/pl\n"
+        "Adding to your Playlist [b]osu!fy https://open.spotify.com/playlist/pl\n"
+        "Your Playlist is no longer in your Spotify library.\n"
+    )
