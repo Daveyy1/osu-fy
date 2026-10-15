@@ -12,7 +12,9 @@ requests are the record of that.*
    and US-03, connect to Spotify (#7, PR #24): the `StreamingService` port,
    the Spotify adapter (PKCE, tokens in `%APPDATA%\osu-fy\spotify-token.json`)
    and the login step after reading the Songs. PR #24 also built US-10.3 and
-   US-10.4 for the login only; #15 builds the rest of US-10. The Songs are
+   US-10.4 for the login only; #15 builds the rest of US-10. #15 also
+   builds the refresh at every start that US-03.5 asks for since PR #25:
+   the code still refreshes only an expired token. The Songs are
    not kept between Sessions yet (US-05, US-09). Issues #8 to #16 hold the
    rest of version one, one per ticket, with GitHub's native "blocked by"
    links; `docs/spec/roadmap.md` maps them.
