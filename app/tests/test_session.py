@@ -7,11 +7,11 @@ from osu_fy.adapters.lazer import LazerSource
 from osu_fy.core.session import run_session
 
 
-def test_session_greets_finds_the_lazer_folder_reads_songs_logs_in_then_waits_for_quit(
+def test_session_reads_songs_logs_in_and_creates_the_playlist_then_waits_for_quit(
     tmp_path: Path,
 ) -> None:
     (tmp_path / "osu" / "files").mkdir(parents=True)
-    player = ScriptedPlayer(True, "0123456789abcdef0123456789abcdef")
+    player = ScriptedPlayer(True, "0123456789abcdef0123456789abcdef", None)
 
     run_session(
         player, LazerSource(tmp_path), FakeStreaming("Kanon"), tmp_path / "osu-fy"
@@ -25,5 +25,7 @@ def test_session_greets_finds_the_lazer_folder_reads_songs_logs_in_then_waits_fo
         "Spotify setup guide",
         "Client ID?",
         "Logged in to Spotify as Kanon",
+        "Name for your Playlist [osu!fy]:",
+        "Created your Playlist osu!fy https://open.spotify.com/playlist/created-1",
         "wait_for_quit",
     ]
