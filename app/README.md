@@ -15,10 +15,10 @@ It greets you, finds your lazer folder (US-01), reads it with a progress
 bar and shows "Found <n> Songs in <m> Beatmapsets" (US-02), logs in to
 Spotify (US-03), creates your Playlist or finds it again (US-04), searches
 Spotify for every Song with a progress bar and shows how many are Certain
-matches and Unmatched Songs (US-05a), then waits; `q` (or `Q`, or Ctrl+C)
-quits at any prompt. Doubtful matches and the full matching rules (US-05b)
-and adding Tracks (US-06) are not built yet, and nothing found is kept
-between Sessions (US-09).
+matches, Doubtful matches and Unmatched Songs (US-05), then waits; `q` (or
+`Q`, or Ctrl+C) quits at any prompt. Adding Tracks (US-06) and the Review
+(US-07) are not built yet, and nothing found is kept between Sessions
+(US-09).
 
 **Files:** osu-fy remembers the confirmed lazer folder, your Spotify
 Client ID and your Playlist's Spotify id in `%APPDATA%\osu-fy\settings.json`, and the Spotify login (access
@@ -91,17 +91,24 @@ hand when you are done.
 
 | State | How |
 |-------|-----|
-| The search and its bar (US-05.8, US-05.10) | Start osu-fy with a login and a Playlist. After the Playlist line, "Searching Spotify <n>/<total>" counts up with the elapsed time, then the summary line follows. With the sample lazer folder (see US-02): "1 Certain matches, 0 Doubtful matches, 7 Unmatched Songs" (Silver Forest is the Certain one, as of 2026-10-17). |
-| A Certain match (US-05.3), an Unmatched Song (US-05.7) | The sample lazer folder: Silver Forest – ケロ⑨destiny is Certain; Jump Training #1 is Unmatched. Until US-08 the terminal shows only the counts. |
+| The search and its bar (US-05.8, US-05.10) | Start osu-fy with a login and a Playlist. After the Playlist line, "Searching Spotify <n>/<total>" counts up with the elapsed time, then the summary line follows. |
+| The matching rules (US-05.1 to US-05.7) | The sample lazer folder (see US-02) holds one Song per rule: 花になって (TV Size) and the WORLD ~TV Size~ (cuts, either script), ケロ⑨destiny (exact), Greetings (only an extended mix: Doubtful), Rockefeller Street (Nightcore Mix) and Monster (DotEXE Remix) (exact version, else the original as Doubtful), Walk This Way! (covers only), Jump Training #1 (nothing). Until US-07 and US-08 the terminal shows only the counts. |
+| The quality set (US-05.12) | Below: `test_US_05_12_the_quality_set` replays it and prints "Unmatched among the old Unmatched Songs: <n> of <m>". |
 | The pace (US-05.9) | Your real lazer folder: about 300 Songs take minutes, not seconds. |
 | Too many requests (US-05.11) | Cannot be provoked safely by hand; automated tests only. |
 
-**Recorded answers.** `uv run --directory app python tests/record_searches.py`
-makes the searches of a Session for the sample Songs with your login, and
-saves Spotify's answers in `app/tests/recordings/`. Git ignores that folder:
-Spotify's terms do not allow committing them. The test that replays them
-is skipped where the folder is missing, so it never runs in CI. Record again
-when the search changes (US-05b) or Spotify's catalogue moves on.
+**Recorded answers and the quality set.** `uv run --directory app python
+tests/record_searches.py` makes the searches of a Session for the sample
+Songs with your login, and saves Spotify's answers in `app/tests/recordings/`.
+With the old tool's export folder as argument (`tests/recordings/old-export`:
+the three `local_lazer_songs_spotify_*.csv` files from `Daveyy1/OsuSongParser`
+and `confirmed.csv`, the 11 Songs confirmed on #10), it also writes the quality
+set: the Beatmapsets of those files still installed in your lazer folder,
+and records their searches (about 4 minutes). Git ignores that folder:
+Spotify's terms do not allow committing it. The tests that replay it are
+skipped where it is missing, so they never run in CI; `pytest -s` shows the
+quality set's count. Record again when the search changes or Spotify's
+catalogue moves on.
 
 A stand-in `%APPDATA%` for one PowerShell window (osu-fy then remembers
 nothing in the real one): `mkdir $env:TEMP\roaming; $env:APPDATA =

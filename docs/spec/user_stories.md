@@ -102,8 +102,9 @@ once**.
   both scripts.
 - **US-02.3** Two Beatmapsets are the same Song when their artist and title
   are equal after ignoring case, full-width characters, extra spaces and
-  cut markers: `(TV Size)`, `(TV Size Ver.)`, `(TV size ver.)`,
-  `(Cut Ver.)`, `(Short Ver.)`, `～TVサイズ～`, `~TV Size~`. The romanised
+  cut markers: TV Size, TV size ver., TV Edit, TV MIX, anime size, Cut Ver.
+  and Short Ver., in `()`, `[]`, `（）`, `-…-`, `~…~` or `～…～`, or after
+  ` - `, and `～TVサイズ～` (Q5 of #10). The romanised
   artist and title are compared; the original script only when they are
   empty. Version markers such as `(Nightcore Mix)`, `(… Remix)` or
   `(Extended Mix)` are **not** ignored: a Nightcore map and the original are
@@ -237,14 +238,20 @@ The automated tests use recorded Spotify answers.
   to wait." This holds for every request, not only the search. (The
   countdown, continuing and the local time come in US-10.) Automated test
   only.
-- **US-05.12** On the matching quality set (the old tool's 154 matched
-  Songs, the five Song-identity cases above, and about ten Songs the old
-  tool missed with a Track the owner confirmed): **no wrong Certain
-  match**, and each of the 154 Songs is matched to the same Track as
-  before, as a Certain or Doubtful match. Automated test on recorded
-  answers. By hand: on the owner's library, fewer than 132 Unmatched Songs.
-  The quality set holds only artist, title, Beatmapset id and Spotify Track
-  id per Song (see "Test data in the repository" in `constraints.md`).
+- **US-05.12** On the matching quality set: **no wrong Certain match**,
+  and each old match is matched to the same Track as before, as a Certain
+  or Doubtful match. The quality set (Q1 of #10) is the old tool's matched
+  Songs that are still installed (90 Songs on 2026-10-17), the five
+  Song-identity cases above, and 11 Songs the old tool missed with a Track
+  the owner confirmed (#10, Q2). "The same Track" is the same Spotify id or
+  a Track with the same title and artists after normalisation, another
+  release of the same recording (Q4). Old matches no rule can reach, such
+  as translated titles, are named exceptions with their reason, approved
+  in the pull request (Q10). Automated test on recorded answers, local only.
+  By hand: among the old tool's Unmatched Songs that are still installed
+  (26 on 2026-10-17), osu-fy leaves fewer Unmatched. The quality set holds
+  only artist and title (both scripts), Beatmapset id and Spotify Track id
+  per Song (see "Test data in the repository" in `constraints.md`).
 
 Out of scope: adding anything to the Playlist (US-06, US-07); searching
 again in later Sessions (US-09).
