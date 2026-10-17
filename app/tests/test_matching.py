@@ -133,7 +133,7 @@ RECORDINGS = Path(__file__).parent / "recordings" / "searches.json"
     not RECORDINGS.exists(),
     reason="no local recordings (Q1 of #9): run tests/record_searches.py",
 )
-def test_US_05_3_and_US_05_7_on_spotifys_recorded_answers_for_the_sample_songs(
+def test_US_05_2_to_US_05_7_on_spotifys_recorded_answers_for_the_sample_songs(
     tmp_path: Path,
 ) -> None:
     streaming = FakeStreaming()
@@ -149,7 +149,16 @@ def test_US_05_3_and_US_05_7_on_spotifys_recorded_answers_for_the_sample_songs(
 
     certain = {m.song.key for m in matches if m.certain}
     assert ("silver forest", "kero (9) destiny") in certain
+    assert ("nightmare", "the world") in certain  # US-05.2
     assert ("various artist", "jump training #1") in {song.key for song in unmatched}
+    # the five Song-identity cases on real answers: never a wrong Certain match
+    doubtful_at_most = {
+        ("vinxis", "greetings"),  # US-05.4
+        ("getter jaani", "rockefeller street (nightcore mix)"),  # US-05.5
+        ("meg & dia", "monster (dotexe remix)"),  # US-05.5
+        ("kano", "walk this way!"),  # US-05.6: covers only
+    }
+    assert certain.isdisjoint(doubtful_at_most)
 
 
 HANA = Beatmapset(
