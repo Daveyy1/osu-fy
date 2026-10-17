@@ -13,9 +13,12 @@ uv run --directory app osu-fy
 
 It greets you, finds your lazer folder (US-01), reads it with a progress
 bar and shows "Found <n> Songs in <m> Beatmapsets" (US-02), logs in to
-Spotify (US-03), creates your Playlist or finds it again (US-04), then
-waits; `q` (or `Q`, or Ctrl+C) quits at any prompt. Matching Songs and
-adding Tracks are not built yet (US-05, US-06).
+Spotify (US-03), creates your Playlist or finds it again (US-04), searches
+Spotify for every Song with a progress bar and shows how many are Certain
+matches and Unmatched Songs (US-05a), then waits; `q` (or `Q`, or Ctrl+C)
+quits at any prompt. Doubtful matches and the full matching rules (US-05b)
+and adding Tracks (US-06) are not built yet, and nothing found is kept
+between Sessions (US-09).
 
 **Files:** osu-fy remembers the confirmed lazer folder, your Spotify
 Client ID and your Playlist's Spotify id in `%APPDATA%\osu-fy\settings.json`, and the Spotify login (access
@@ -28,9 +31,14 @@ you through it. Its redirect URI must be exactly
 `http://127.0.0.1:8765/callback`. osu-fy talks only to `accounts.spotify.com`
 and `api.spotify.com`.
 
+**Pace:** osu-fy leaves at least 1 second between two requests to Spotify,
+so about 300 Songs take about 5 to 10 minutes. If Spotify answers "too many
+requests", osu-fy stops with "Spotify asks us to wait <time>".
+
 **Environment variables:** only Windows' own `%APPDATA%`. No fake adapters:
 the fake Spotify (`tests/fake_streaming.py`, and the fake `requests.Session`
-in `tests/test_spotify.py`) is used only by the tests.
+in `tests/test_spotify.py`) is used only by the tests, with hand-written
+Tracks (names from the osu! metadata, made-up ids).
 
 ### Reaching each state of US-01
 
@@ -79,6 +87,22 @@ hand when you are done.
 | A playlist called `osu!fy` that osu-fy did not create (US-04.3) | Create a playlist named `osu!fy` in Spotify by hand, then do as for US-04.1. |
 | Playlist deleted in Spotify (US-04.4) | Delete the Playlist in Spotify, then start osu-fy again. |
 
+### Reaching each state of US-05a
+
+| State | How |
+|-------|-----|
+| The search and its bar (US-05.8, US-05.10) | Start osu-fy with a login and a Playlist. After the Playlist line, "Searching Spotify <n>/<total>" counts up with the elapsed time, then the summary line follows. With the sample lazer folder (see US-02): "1 Certain matches, 0 Doubtful matches, 7 Unmatched Songs" (Silver Forest is the Certain one, as of 2026-10-17). |
+| A Certain match (US-05.3), an Unmatched Song (US-05.7) | The sample lazer folder: Silver Forest – ケロ⑨destiny is Certain; Jump Training #1 is Unmatched. Until US-08 the terminal shows only the counts. |
+| The pace (US-05.9) | Your real lazer folder: about 300 Songs take minutes, not seconds. |
+| Too many requests (US-05.11) | Cannot be provoked safely by hand; automated tests only. |
+
+**Recorded answers.** `uv run --directory app python tests/record_searches.py`
+makes the searches of a Session for the sample Songs with your login, and
+saves Spotify's answers in `app/tests/recordings/`. Git ignores that folder:
+Spotify's terms do not allow committing them. The test that replays them
+is skipped where the folder is missing, so it never runs in CI. Record again
+when the search changes (US-05b) or Spotify's catalogue moves on.
+
 A stand-in `%APPDATA%` for one PowerShell window (osu-fy then remembers
 nothing in the real one): `mkdir $env:TEMP\roaming; $env:APPDATA =
 "$env:TEMP\roaming"`, then start osu-fy as above.
@@ -108,6 +132,7 @@ src/osu_fy/
   __main__.py the osu-fy command; wires adapters and UI into the core
 tests/        pytest, one file per module it covers
   sample-lazer/  the sample lazer folder: 9 Beatmapsets, .osu files only
+  record_searches.py  records Spotify's answers into recordings/ (git-ignored)
 ```
 
 The core imports nothing from `adapters/`, `ui/`, spotipy, rich or
