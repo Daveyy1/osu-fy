@@ -222,7 +222,8 @@ Sharing
   script (credits after `feat.`, `ft.`, `&` or `x` may be split across the
   Track's artists), and the Track's title equals the Song's title after
   removing cut markers on both sides (including Spotify's `- TV Size`
-  style suffixes).
+  style suffixes) and remaster suffixes on the Track's side (`- Remastered`,
+  `- 2011 Remaster`): a remaster is the same recording.
 - **Doubtful:** the same artist and the base title with an extra version
   (extended mix, other mix), the original for a remix or Nightcore Song, or
   a close but not equal artist and title by a similarity score (rapidfuzz).
@@ -308,11 +309,7 @@ quality set.
 
 **Open questions for the plans** (the spec does not decide them; the plan
 of the named story asks the owner):
-- US-05: is a `- Remastered` or year-remaster suffix Certain or Doubtful?
-  Recommendation: Certain, as it is the same recording.
 - US-05: the similarity threshold for Doubtful, fixed from the quality set.
-- US-01: the exact format of lazer's `storage.ini`, checked against lazer's
-  source.
 
 **Facts this spec rests on** (checked 2026-10-14, see `../../../handoff.md`):
 Spotify development mode (5 users, owner needs Premium), the February 2026
