@@ -1,6 +1,6 @@
 from collections.abc import Callable
 
-from osu_fy.core.ports import LoginIncomplete, Playlist
+from osu_fy.core.ports import LoginIncomplete, Playlist, Track
 
 INCOMPLETE = LoginIncomplete()
 
@@ -8,7 +8,8 @@ INCOMPLETE = LoginIncomplete()
 class FakeStreaming:
     """log_in answers from a script: a display name, or INCOMPLETE after the browser opened.
 
-    library holds the playlists in the Player's Spotify library, by id.
+    library holds the playlists in the Player's Spotify library, by id; searches
+    the answer to each search, by (artist, title).
     """
 
     def __init__(self, *logins: str | LoginIncomplete) -> None:
@@ -16,6 +17,8 @@ class FakeStreaming:
         self.client_ids: list[str] = []
         self.library: dict[str, Playlist] = {}
         self.created: list[str] = []
+        self.searches: dict[tuple[str, str], list[Track]] = {}
+        self.searched: list[tuple[str, str]] = []
 
     def log_in(self, client_id: str, keep_waiting: Callable[[str | None], bool]) -> str:
         self.client_ids.append(client_id)
@@ -38,3 +41,9 @@ class FakeStreaming:
 
     def find_playlist(self, playlist_id: str) -> Playlist | None:
         return self.library.get(playlist_id)
+
+    def find_tracks(self, artist: str, title: str) -> list[Track]:
+        self.searched.append((artist, title))
+        # loud, so a test never passes on a search it did not expect
+        assert (artist, title) in self.searches, f"no answer for {artist} – {title}"
+        return self.searches[(artist, title)]

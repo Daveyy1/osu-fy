@@ -27,6 +27,15 @@ class Playlist:
     link: str
 
 
+@dataclass(frozen=True)
+class Track:
+    id: str
+    title: str
+    artists: tuple[str, ...]
+    album: str
+    length_ms: int
+
+
 class Player(Protocol):
     """Everything osu-fy shows the Player or asks them. The core never prints."""
 
@@ -78,6 +87,12 @@ class Player(Protocol):
 
     def show_playlist_gone(self) -> None: ...
 
+    def show_songs_searched(self, done: int, total: int) -> None: ...
+
+    def show_match_summary(
+        self, certain: int, doubtful: int, unmatched: int
+    ) -> None: ...
+
 
 class Source(Protocol):
     """Where the Songs come from: osu!lazer for now."""
@@ -111,4 +126,8 @@ class StreamingService(Protocol):
 
     def find_playlist(self, playlist_id: str) -> Playlist | None:
         """The Playlist with this id in the Player's library, with its current name."""
+        ...
+
+    def find_tracks(self, artist: str, title: str) -> list[Track]:
+        """At most 10 candidate Tracks for one search."""
         ...
