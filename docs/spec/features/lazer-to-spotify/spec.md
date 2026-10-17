@@ -216,18 +216,26 @@ Sharing
 **Matching rules:**
 - Search order for a Song: the romanised artist and title; then the
   original script if different; for a remix or Nightcore Song, the base
-  title without the version marker last. Stop at the first Certain match.
+  title without the version marker last. Cut markers and `feat.` credits
+  are left out of the query. Stop at the first Certain match.
   One to three searches per Song.
-- **Certain:** one of the Track's artists equals the Song's artist in either
-  script (credits after `feat.`, `ft.`, `&` or `x` may be split across the
-  Track's artists), and the Track's title equals the Song's title after
-  removing cut markers on both sides (including Spotify's `- TV Size`
-  style suffixes) and remaster suffixes on the Track's side (`- Remastered`,
-  `- 2011 Remaster`): a remaster is the same recording.
+- **Certain:** the Song's first credit is one of the Track's artists, in
+  either script (the Song's artist is split at ` feat. `, ` ft. `,
+  ` feat `, ` & `, ` x `, `, ` and ` + `, Q6 of #10), and the Track's title
+  equals the Song's title after removing cut markers on both sides
+  (including Spotify's `- TV Size` style suffixes), `(feat. …)` and
+  `ft. …` credits on both sides, and remaster and `- Original Mix`
+  suffixes on the Track's side (`- Remastered`, `- 2011 Remaster`): those
+  are the same recording (Q7). A version marker reads the same in brackets
+  or after ` - `.
+- **Never a Match:** a Track whose title says `instrumental`, `inst`,
+  `off vocal`, `karaoke` or `カラオケ`, unless the Song's title says the
+  same (Q8 of #10).
 - **Doubtful:** the same artist and the base title with an extra version
   (extended mix, other mix), the original for a remix or Nightcore Song, or
   a close but not equal artist and title by a similarity score (rapidfuzz).
-  The threshold is fixed in US-05's plan from the quality set.
+  The threshold is the highest value that keeps every quality-set Song at
+  least Doubtful, set by #10's build and confirmed in its review (Q9).
 - **Unmatched:** nothing reaches the Doubtful threshold.
 - A Track by a different artist is never Certain.
 

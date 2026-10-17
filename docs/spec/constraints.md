@@ -47,7 +47,8 @@ of remaining prose intention.*
 - The osu! install is opened read only (N2).
 - **Test data in the repository.** The repository is public. The matching
   quality set and the recorded Spotify answers hold only what the tests
-  need: artist, title, Beatmapset id, Spotify Track id, and for recordings
+  need: artist and title (both scripts), Beatmapset id, Spotify Track id,
+  and for recordings
   the Track fields of the port (title, artists, album, length). No playlist
   ids, no account or profile data, no tokens, no request headers. Spotify's
   Developer Terms (IV.3.1.a, IV.3.2.a, effective 15 May 2025) forbid storing
