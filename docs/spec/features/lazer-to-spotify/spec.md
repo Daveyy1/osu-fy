@@ -234,8 +234,11 @@ Sharing
 - **Doubtful:** the same artist and the base title with an extra version
   (extended mix, other mix), the original for a remix or Nightcore Song, or
   a close but not equal artist and title by a similarity score (rapidfuzz).
-  The threshold is the highest value that keeps every quality-set Song at
-  least Doubtful, set by #10's build and confirmed in its review (Q9).
+  The score is the lower of the artist score (the better of rapidfuzz's
+  `ratio` and `token_sort_ratio`, so names in either order count) and the
+  title score (`ratio`, also between base titles). The threshold is **80**:
+  the highest value that keeps every quality-set Song at least Doubtful,
+  measured by #10's build on 2026-10-17 (Q9).
 - **Unmatched:** nothing reaches the Doubtful threshold.
 - A Track by a different artist is never Certain.
 
@@ -315,9 +318,8 @@ quality set.
 
 ## Further Notes
 
-**Open questions for the plans** (the spec does not decide them; the plan
-of the named story asks the owner):
-- US-05: the similarity threshold for Doubtful, fixed from the quality set.
+**Open questions for the plans:** none left; the last ones were answered in
+#10.
 
 **Facts this spec rests on** (checked 2026-10-14, see `../../../handoff.md`):
 Spotify development mode (5 users, owner needs Premium), the February 2026

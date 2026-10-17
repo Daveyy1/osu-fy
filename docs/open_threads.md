@@ -7,10 +7,7 @@ issues and pull requests on GitHub. Status: 🔲 not started · 🔄 partial · 
 Remove an entry when it is done: the pull request is the record.
 
 ## Decisions needed
-- 🔲 Open question left to a plan (feature spec, "Further Notes"): the
-  Doubtful threshold (US-05b, #10).
+None.
 
 ## Spec pack
-- 🔲 In US-05b's plan (#10): the owner confirms about ten missed Songs (y/n)
-  for the matching quality set; the assistant proposes the Tracks. Done
-  straight away with the plan's other questions.
+None.
