@@ -1,5 +1,6 @@
 """Beatmapsets and the Songs they make (US-02)."""
 
+import re
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
@@ -29,25 +30,17 @@ def normal(text: str) -> str:
     return " ".join(unicodedata.normalize("NFKC", text).casefold().split())
 
 
-CUT_MARKERS = tuple(
-    normal(marker)
-    for marker in (
-        "(TV Size)",
-        "(TV Size Ver.)",
-        "(Cut Ver.)",
-        "(Short Ver.)",
-        "～TVサイズ～",
-        "~TV Size~",
-    )
+_CUT = r"(?:tv ?size(?: ver\.?)?|tv ?edit\.?|tv ?mix|anime ?size|cut ver\.?|short ver\.?|tvサイズ)"
+# in (), [], -…-, ~…~ or after " - "; full-width forms are normal width by then (Q5 of #10)
+CUT_MARKER = re.compile(
+    rf" ?(?:\( ?{_CUT} ?\)|\[ ?{_CUT} ?\]|- ?{_CUT} ?-|~ ?{_CUT} ?~| - {_CUT}$)",
+    re.IGNORECASE,
 )
 
 
 def normal_title(text: str) -> str:
     """A title as compared: normal, cut markers removed (US-02.3)."""
-    title = normal(text)
-    for marker in CUT_MARKERS:
-        title = title.replace(marker, " ")
-    return normal(title)
+    return normal(CUT_MARKER.sub(" ", normal(text)))
 
 
 def song_key(beatmapset: Beatmapset) -> tuple[str, str]:

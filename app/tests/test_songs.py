@@ -116,3 +116,35 @@ def test_US_02_3_the_original_script_counts_only_when_the_romanised_is_empty() -
     assert song_key(only_original) == song_key(
         Beatmapset(None, "", "鹿乃", "", "WALK this way! (TV Size)")
     )
+
+
+@pytest.mark.parametrize(
+    "title",
+    [
+        "Hana ni Natte [TV Size]",
+        "Hana ni Natte (TV edit)",
+        "Hana ni Natte（TV edit.）",
+        "Hana ni Natte -TV MIX-",
+        "Hana ni Natte -TV SIZE-",
+        "Hana ni Natte - TV Size",
+        "Hana ni Natte (anime size)",
+    ],
+)
+def test_US_02_3_every_form_of_cut_marker_is_ignored(title: str) -> None:
+    original = beatmapset("Ryokuoushoku Shakai", "Hana ni Natte")
+
+    assert song_key(beatmapset("Ryokuoushoku Shakai", title)) == song_key(original)
+
+
+@pytest.mark.parametrize(
+    "title",
+    [
+        "Zen Zen Zense (movie ver.)",
+        "Zen Zen Zense (Game Ver.)",
+        "Zen Zen Zense (TV Size & ED Ver.)",
+    ],
+)
+def test_US_02_3_other_recordings_stay_other_songs(title: str) -> None:
+    assert song_key(beatmapset("RADWIMPS", title)) != song_key(
+        beatmapset("RADWIMPS", "Zen Zen Zense")
+    )
