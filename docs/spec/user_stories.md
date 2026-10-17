@@ -232,7 +232,11 @@ The automated tests use recorded Spotify answers.
   "<n> Certain matches, <n> Doubtful matches, <n> Unmatched Songs".
 - **US-05.11** Given Spotify answers "too many requests", then osu-fy never
   waits without saying so: it stops with "Spotify asks us to wait <time>".
-  (The countdown and continuing come in US-10.) Automated test only.
+  `<time>` is "30 s" up to 120 seconds, else rounded up to "12 min" or
+  "5 h 3 min"; without a `Retry-After` header the line is "Spotify asks us
+  to wait." This holds for every request, not only the search. (The
+  countdown, continuing and the local time come in US-10.) Automated test
+  only.
 - **US-05.12** On the matching quality set (the old tool's 154 matched
   Songs, the five Song-identity cases above, and about ten Songs the old
   tool missed with a Track the owner confirmed): **no wrong Certain
