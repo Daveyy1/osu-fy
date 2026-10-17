@@ -11,17 +11,23 @@ requests are the record of that.*
    lazer folder (#5, PR #20), US-02, read Songs from lazer (#6, PR #22),
    and US-03, connect to Spotify (#7, PR #24): the `StreamingService` port,
    the Spotify adapter (PKCE, tokens in `%APPDATA%\osu-fy\spotify-token.json`)
-   and the login step after reading the Songs. PR #24 also built US-10.3 and
+   and the login step after reading the Songs; and US-04, name and create
+   the Playlist (#8, PR #26): a private Playlist, its id in `settings.json`,
+   found by that id in later Sessions. PR #24 also built US-10.3 and
    US-10.4 for the login only; #15 builds the rest of US-10. #15 also
    builds the refresh at every start that US-03.5 asks for since PR #25:
-   the code still refreshes only an expired token. The Songs are
+   the code still refreshes only an expired token. #15 also handles a 403
+   or other 4xx from creating or finding the Playlist, which still raises
+   a traceback. The Songs are
    not kept between Sessions yet (US-05, US-09). Issues #8 to #16 hold the
    rest of version one, one per ticket, with GitHub's native "blocked by"
    links; `docs/spec/roadmap.md` maps them.
 2. Next: in a work session (`claude --settings .claude/work-settings.json`),
-   `/plan 8` (name and create the Playlist, US-04). Then the owner answers
-   and sets `plan-approved`, and `/build`. The owner's Spotify developer
-   app exists and the login works on it.
+   `/plan 9` (search Spotify at a safe pace, US-05a). Its plan checks
+   whether Spotify's developer terms allow committing recorded responses
+   (`constraints.md`, "Test data in the repository"), because #9 builds the
+   recordings. Then the owner answers and sets `plan-approved`, and
+   `/build`. The owner confirms the quality set before #10, not now.
 
 ## Settled in the interview (rounds 1 to 7), now written into `docs/spec/`
 - **What it is:** osu-fy turns the Songs a Player knows from osu! into a

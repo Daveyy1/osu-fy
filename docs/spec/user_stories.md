@@ -205,7 +205,9 @@ The automated tests use recorded Spotify answers.
 
 - **US-05.1** Given 花になって (TV Size) and a Track 花になって by the same
   artist, then the result is a **Certain match** (a cut marker does not
-  matter).
+  matter). The same holds for a remaster suffix on the Track: a Track
+  "<title> - Remastered" or "<title> - 2011 Remaster" by the same artist is
+  a **Certain match**.
 - **US-05.2** Given ナイトメア – the WORLD, romanised NIGHTMARE, and a Track
   "the WORLD" by NIGHTMARE, then it is a **Certain match** (artist or title
   in either script counts).
