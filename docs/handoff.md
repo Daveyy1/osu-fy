@@ -13,21 +13,36 @@ requests are the record of that.*
    the Spotify adapter (PKCE, tokens in `%APPDATA%\osu-fy\spotify-token.json`)
    and the login step after reading the Songs; and US-04, name and create
    the Playlist (#8, PR #26): a private Playlist, its id in `settings.json`,
-   found by that id in later Sessions. PR #24 also built US-10.3 and
+   found by that id in later Sessions; and US-05a, search Spotify at a
+   safe pace (#9, PR #28): `find_tracks`, every request at least 1 s
+   apart, a 429 stops with "Spotify asks us to wait <time>", and the first
+   rule (exact artist and title, either script, is Certain). PR #24 also
+   built US-10.3 and
    US-10.4 for the login only; #15 builds the rest of US-10. #15 also
    builds the refresh at every start that US-03.5 asks for since PR #25:
    the code still refreshes only an expired token. #15 also handles a 403
    or other 4xx from creating or finding the Playlist, which still raises
-   a traceback. The Songs are
-   not kept between Sessions yet (US-05, US-09). Issues #8 to #16 hold the
+   a traceback, and a 429 on the token refresh, which opens the browser
+   instead of the wait message. Nothing found is kept between Sessions
+   yet (US-09). Issues #8 to #16 hold the
    rest of version one, one per ticket, with GitHub's native "blocked by"
    links; `docs/spec/roadmap.md` maps them.
 2. Next: in a work session (`claude --settings .claude/work-settings.json`),
-   `/plan 9` (search Spotify at a safe pace, US-05a). Its plan checks
-   whether Spotify's developer terms allow committing recorded responses
-   (`constraints.md`, "Test data in the repository"), because #9 builds the
-   recordings. Then the owner answers and sets `plan-approved`, and
-   `/build`. The owner confirms the quality set before #10, not now.
+   `/plan 10` (matching rules and the quality set, US-05b), following the
+   roadmap. The y/n round for the quality set happens in that plan, and
+   the owner does it straight away: the plan proposes a Track for each of
+   about ten Songs the old tool missed, and the owner answers y/n on the
+   issue together with the other questions. The 154 matched Songs come
+   from the old tool's last lazer export in the private
+   `Daveyy1/OsuSongParser`; the plan asks how to get them if `gh` cannot
+   read that repository. The quality set and the recordings stay in the
+   git-ignored `app/tests/recordings/` (Q1 of #9). Then the owner sets
+   `plan-approved`, and `/build`.
+3. What PR #28's real search showed (8 sample Songs, 2026-10-17): the
+   `track:`/`artist:` filters work; a query that keeps a cut marker
+   (`Hana ni Natte (TV Size)`) finds nothing; searches in the original
+   script (`鹿乃`, `緑黄色社会`, `ナイトメア`) find nothing; result 1 Certain
+   match, 7 Unmatched Songs. #10 should see that number fall.
 
 ## Settled in the interview (rounds 1 to 7), now written into `docs/spec/`
 - **What it is:** osu-fy turns the Songs a Player knows from osu! into a
