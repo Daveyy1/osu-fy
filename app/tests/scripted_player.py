@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from osu_fy.core.ports import PlayerQuit
+from osu_fy.core.ports import PlayerQuit, Playlist
 
 
 class ScriptedPlayer:
@@ -72,6 +72,21 @@ class ScriptedPlayer:
 
     def show_logged_in(self, name: str) -> None:
         self.shown.append(f"Logged in to Spotify as {name}")
+
+    def ask_playlist_name(self, default: str) -> str:
+        self.shown.append(f"Name for your Playlist [{default}]:")
+        answer = self._next()  # None stands for Enter
+        assert answer is None or isinstance(answer, str)
+        return default if answer is None else answer
+
+    def show_playlist_created(self, playlist: Playlist) -> None:
+        self.shown.append(f"Created your Playlist {playlist.name} {playlist.link}")
+
+    def show_playlist_in_use(self, playlist: Playlist) -> None:
+        self.shown.append(f"Adding to your Playlist {playlist.name} {playlist.link}")
+
+    def show_playlist_gone(self) -> None:
+        self.shown.append("Your Playlist is no longer in your Spotify library.")
 
     def _next(self) -> bool | str | None:
         assert self.answers, "osu-fy asked more than the script answers"

@@ -5,7 +5,8 @@ import logging
 import secrets
 import time
 import webbrowser
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -14,7 +15,7 @@ import spotipy
 from spotipy.cache_handler import CacheHandler
 from spotipy.oauth2 import SpotifyOauthError, SpotifyPKCE, start_local_http_server
 
-from osu_fy.core.ports import LoginIncomplete, StreamingServiceUnavailable
+from osu_fy.core.ports import LoginIncomplete, Playlist, StreamingServiceUnavailable
 
 PORT = 8765
 REDIRECT_URI = f"http://127.0.0.1:{PORT}/callback"
@@ -24,6 +25,7 @@ LOGIN_TIMEOUT = 180  # seconds (US-03.4)
 REQUEST_TIMEOUT = 10  # seconds (api_contracts)
 CANT_REACH = "Can't reach Spotify. Everything found so far is kept; try again later."
 PORT_IN_USE = f"Port {PORT} is in use; is osu-fy already running?"
+DESCRIPTION = "Songs from osu!, added by osu-fy"
 
 # spotipy logs the Authorization header and token requests at DEBUG (N3); a level,
 # unlike `disabled`, also holds for its child loggers spotipy.client and spotipy.oauth2
@@ -63,6 +65,7 @@ class Spotify:
         # a plain Session never retries, so spotipy never sleeps silently on a 429 (ADR-004)
         self._session = session or requests.Session()
         self._clock = clock
+        self._client: spotipy.Spotify | None = None
 
     def log_in(self, client_id: str, keep_waiting: Callable[[str | None], bool]) -> str:
         auth = SpotifyPKCE(
@@ -74,21 +77,40 @@ class Spotify:
             requests_timeout=REQUEST_TIMEOUT,
             requests_session=self._session,
         )
-        try:
+        with _reachable():
             if not self._has_usable_login(auth):
                 self._log_in_in_browser(auth, keep_waiting)
-            me = spotipy.Spotify(
+            self._client = spotipy.Spotify(
                 auth_manager=auth,
                 requests_session=self._session,
                 requests_timeout=REQUEST_TIMEOUT,
-            ).current_user()
-        except (requests.ConnectionError, requests.Timeout) as error:
-            raise StreamingServiceUnavailable(CANT_REACH) from error
-        except spotipy.SpotifyException as error:
-            if error.http_status >= 500:
-                raise StreamingServiceUnavailable(CANT_REACH) from error
-            raise
+            )
+            me = self._client.current_user()
         return str(me["display_name"] or me["id"])
+
+    def create_playlist(self, name: str) -> Playlist:
+        with _reachable():
+            created = self._logged_in().current_user_playlist_create(
+                name,
+                public=False,  # spotipy's default is public
+                description=DESCRIPTION,
+            )
+        return _playlist(created)
+
+    def find_playlist(self, playlist_id: str) -> Playlist | None:
+        client = self._logged_in()
+        with _reachable():
+            page = client.current_user_playlists(limit=50)
+            while page is not None:
+                for item in page["items"]:
+                    if item and item["id"] == playlist_id:
+                        return _playlist(item)
+                page = client.next(page)  # None after the last page
+        return None
+
+    def _logged_in(self) -> spotipy.Spotify:
+        assert self._client is not None, "log_in comes first in every Session"
+        return self._client
 
     def _has_usable_login(self, auth: SpotifyPKCE) -> bool:
         try:  # validate_token refreshes an expired token (US-10.3)
@@ -125,3 +147,20 @@ class Spotify:
             raise LoginIncomplete
         finally:
             server.server_close()
+
+
+@contextmanager
+def _reachable() -> Iterator[None]:
+    """No network, a timeout or a 5xx stops the Session with CANT_REACH (US-03.8)."""
+    try:
+        yield
+    except (requests.ConnectionError, requests.Timeout) as error:
+        raise StreamingServiceUnavailable(CANT_REACH) from error
+    except spotipy.SpotifyException as error:
+        if error.http_status >= 500:
+            raise StreamingServiceUnavailable(CANT_REACH) from error
+        raise
+
+
+def _playlist(item: dict[str, Any]) -> Playlist:
+    return Playlist(item["id"], item["name"], item["external_urls"]["spotify"])

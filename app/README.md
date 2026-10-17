@@ -13,11 +13,12 @@ uv run --directory app osu-fy
 
 It greets you, finds your lazer folder (US-01), reads it with a progress
 bar and shows "Found <n> Songs in <m> Beatmapsets" (US-02), logs in to
-Spotify (US-03), then waits; `q` (or `Q`, or Ctrl+C) quits at any prompt.
-Creating the Playlist is not built yet (US-04).
+Spotify (US-03), creates your Playlist or finds it again (US-04), then
+waits; `q` (or `Q`, or Ctrl+C) quits at any prompt. Matching Songs and
+adding Tracks are not built yet (US-05, US-06).
 
-**Files:** osu-fy remembers the confirmed lazer folder and your Spotify
-Client ID in `%APPDATA%\osu-fy\settings.json`, and the Spotify login (access
+**Files:** osu-fy remembers the confirmed lazer folder, your Spotify
+Client ID and your Playlist's Spotify id in `%APPDATA%\osu-fy\settings.json`, and the Spotify login (access
 and refresh token) in `%APPDATA%\osu-fy\spotify-token.json`. It only reads
 `%APPDATA%\osu` and the lazer folder, never writes there, and writes nothing
 into the folder it was started from.
@@ -65,6 +66,18 @@ in `tests/test_spotify.py`) is used only by the tests.
 | Tokens only in the token file (US-03.6) | Start osu-fy from an empty folder (`cd` there, run `uv run --project <repo>\app osu-fy`); afterwards the folder is still empty, and `%APPDATA%\osu-fy` holds `settings.json` and `spotify-token.json`. |
 | Spotify unreachable (US-03.8) | Disconnect the network, then start osu-fy (with or without a saved login). |
 | Port 8765 in use (US-03.8) | Start a second osu-fy while the first waits for the browser. |
+
+### Reaching each state of US-04
+
+osu-fy never deletes a playlist. Delete the test Playlists in Spotify by
+hand when you are done.
+
+| State | How |
+|-------|-----|
+| No Playlist yet (US-04.1) | Delete only the `spotify_playlist_id` line from `settings.json` (or a fresh start), log in. At "Name for your Playlist [osu!fy]:", press Enter or type a name. In Spotify, the Playlist is under "Your Library", marked private. |
+| A Playlist from an earlier Session (US-04.2) | Start osu-fy again. To see the renamed case, first rename the Playlist in Spotify. |
+| A playlist called `osu!fy` that osu-fy did not create (US-04.3) | Create a playlist named `osu!fy` in Spotify by hand, then do as for US-04.1. |
+| Playlist deleted in Spotify (US-04.4) | Delete the Playlist in Spotify, then start osu-fy again. |
 
 A stand-in `%APPDATA%` for one PowerShell window (osu-fy then remembers
 nothing in the real one): `mkdir $env:TEMP\roaming; $env:APPDATA =

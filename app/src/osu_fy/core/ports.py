@@ -1,6 +1,7 @@
 """The ports the core needs. Adapters and the UI implement them (ADR-005)."""
 
 from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 
@@ -17,6 +18,13 @@ class LoginIncomplete(Exception):
 
 class StreamingServiceUnavailable(Exception):
     """The Session stops and shows this message, without a traceback (US-03.8)."""
+
+
+@dataclass(frozen=True)
+class Playlist:
+    id: str
+    name: str
+    link: str
 
 
 class Player(Protocol):
@@ -60,6 +68,16 @@ class Player(Protocol):
 
     def show_logged_in(self, name: str) -> None: ...
 
+    def ask_playlist_name(self, default: str) -> str:
+        """The typed name, or default on Enter; raises PlayerQuit on q."""
+        ...
+
+    def show_playlist_created(self, playlist: Playlist) -> None: ...
+
+    def show_playlist_in_use(self, playlist: Playlist) -> None: ...
+
+    def show_playlist_gone(self) -> None: ...
+
 
 class Source(Protocol):
     """Where the Songs come from: osu!lazer for now."""
@@ -85,4 +103,12 @@ class StreamingService(Protocol):
         second and raises LoginIncomplete when it returns False, on a refusal, or
         after 3 minutes (US-03.4).
         """
+        ...
+
+    def create_playlist(self, name: str) -> Playlist:
+        """A new private Playlist on the Player's account."""
+        ...
+
+    def find_playlist(self, playlist_id: str) -> Playlist | None:
+        """The Playlist with this id in the Player's library, with its current name."""
         ...
