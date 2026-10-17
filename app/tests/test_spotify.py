@@ -13,7 +13,12 @@ import pytest
 import requests
 
 from osu_fy.adapters.spotify import Spotify
-from osu_fy.core.ports import LoginIncomplete, Playlist, StreamingServiceUnavailable
+from osu_fy.core.ports import (
+    LoginIncomplete,
+    Playlist,
+    StreamingServiceUnavailable,
+    Track,
+)
 
 CLIENT_ID = "0123456789abcdef0123456789abcdef"  # made up
 ACCESS = "fake-access-token-7f3a9c"
@@ -23,6 +28,7 @@ SCOPES = {"playlist-read-private", "playlist-modify-private", "playlist-modify-p
 TOKEN_URL = "https://accounts.spotify.com/api/token"
 ME_URL = "https://api.spotify.com/v1/me/"  # spotipy adds the slash
 PLAYLISTS_URL = "https://api.spotify.com/v1/me/playlists"
+SEARCH_URL = "https://api.spotify.com/v1/search"
 
 
 def keep_waiting(login_url: str | None) -> bool:
@@ -42,6 +48,8 @@ class FakeSpotifySession(requests.Session):
         self.library: list[dict[str, Any]] = []  # the Player's playlists, in order
         self.refresh_refused = False
         self.unreachable = False
+        self.found: list[dict[str, Any] | None] = []  # what a search finds
+        self.retry_after: str | None = None  # set: every API request gets a 429
 
     def request(  # spotipy passes everything but method and url by keyword
         self, method: str | bytes, url: str | bytes, *args: Any, **kwargs: Any
@@ -51,7 +59,9 @@ class FakeSpotifySession(requests.Session):
         if isinstance(data, str):
             data = json.loads(data)  # spotipy sends API bodies as JSON text
         query = {k: v[0] for k, v in parse_qs(urlparse(url).query).items()}
-        query |= {k: str(v) for k, v in (kwargs.get("params") or {}).items()}
+        params = kwargs.get("params") or {}
+        # requests leaves out None, as spotipy relies on
+        query |= {k: str(v) for k, v in params.items() if v is not None}
         url = url.split("?")[0]
         self.requests.append((method, url, dict(data) or query))
         if self.unreachable:
@@ -62,8 +72,13 @@ class FakeSpotifySession(requests.Session):
             if self.refresh_refused:
                 return answer(url, 400, {"error": "invalid_grant"})
             return answer(url, 200, token(NEW_ACCESS))
+        if self.retry_after is not None and "api.spotify.com" in url:
+            headers = {"Retry-After": self.retry_after} if self.retry_after else {}
+            return answer(url, 429, {"error": {"status": 429}}, headers)
         if url == ME_URL:
             return answer(url, 200, self.me)
+        if method == "GET" and url == SEARCH_URL:
+            return answer(url, 200, {"tracks": {"items": self.found}})
         if method == "POST" and url == PLAYLISTS_URL:
             created = spotify_playlist("new-id", data["name"])
             self.library.insert(0, created)
@@ -105,10 +120,13 @@ def token(access: str, expires_in: int = 3600) -> dict[str, Any]:
     }
 
 
-def answer(url: str, status: int, body: dict[str, Any]) -> requests.Response:
+def answer(
+    url: str, status: int, body: dict[str, Any], headers: dict[str, str] | None = None
+) -> requests.Response:
     response = requests.Response()
     response.status_code = status
     response.url = url
+    response.headers.update(headers or {})
     response._content = json.dumps(body).encode()
     return response
 
@@ -158,12 +176,19 @@ def session() -> FakeSpotifySession:
     return FakeSpotifySession()
 
 
+def no_sleep(seconds: float) -> None:
+    pass  # no test waits in real time
+
+
 def spotify(
     app_data: Path,
     session: FakeSpotifySession,
     clock: Callable[[], float] | None = None,
+    sleep: Callable[[float], None] = no_sleep,
 ) -> Spotify:
-    return Spotify(app_data, session=session, **({"clock": clock} if clock else {}))
+    return Spotify(
+        app_data, session=session, sleep=sleep, **({"clock": clock} if clock else {})
+    )
 
 
 def save_token(app_data: Path, access: str, expires_at: int) -> None:
@@ -172,9 +197,11 @@ def save_token(app_data: Path, access: str, expires_at: int) -> None:
     (app_data / "spotify-token.json").write_text(json.dumps(saved), encoding="utf-8")
 
 
-def logged_in(app_data: Path, session: FakeSpotifySession) -> Spotify:
+def logged_in(
+    app_data: Path, session: FakeSpotifySession, adapter: Spotify | None = None
+) -> Spotify:
     save_token(app_data, ACCESS, expires_at=2**40)
-    adapter = spotify(app_data, session)
+    adapter = adapter or spotify(app_data, session)
     adapter.log_in(CLIENT_ID, keep_waiting)
     session.requests.clear()
     return adapter
@@ -456,3 +483,157 @@ def test_spotify_unreachable_at_the_playlist_stops_with_the_clear_message(
     assert str(stop.value) == (
         "Can't reach Spotify. Everything found so far is kept; try again later."
     )
+
+
+def spotify_track(title: str, *artists: str) -> dict[str, Any]:
+    """A Track as Spotify describes it, trimmed to the fields osu-fy reads; made-up id."""
+    return {
+        "id": f"made-up-{title}",
+        "name": title,
+        "artists": [{"name": artist} for artist in artists],
+        "album": {"name": "Album"},
+        "duration_ms": 200_000,
+    }
+
+
+def test_US_05_3_find_tracks_searches_by_track_and_artist_and_reads_the_tracks(
+    tmp_path: Path, no_browser: None, session: FakeSpotifySession
+) -> None:
+    # Spotify sends null for an item it cannot show
+    session.found = [spotify_track("ケロ⑨destiny", "Silver Forest"), None]
+
+    tracks = logged_in(tmp_path, session).find_tracks("Silver Forest", "ケロ⑨destiny")
+
+    assert tracks == [
+        Track(
+            "made-up-ケロ⑨destiny", "ケロ⑨destiny", ("Silver Forest",), "Album", 200_000
+        )
+    ]
+    [(method, url, query)] = session.requests
+    assert (method, url) == ("GET", SEARCH_URL)
+    assert query == {
+        "q": 'track:"ケロ⑨destiny" artist:"Silver Forest"',
+        "type": "track",
+        "limit": "10",
+        "offset": "0",
+    }
+
+
+def test_double_quotes_in_a_title_are_dropped_from_the_search(
+    tmp_path: Path, no_browser: None, session: FakeSpotifySession
+) -> None:
+    logged_in(tmp_path, session).find_tracks("Ado", 'Usseewa "Remix"')
+
+    [(_, _, query)] = session.requests
+    assert query["q"] == 'track:"Usseewa Remix" artist:"Ado"'
+
+
+def test_US_03_7_the_search_contacts_only_api_spotify_com(
+    tmp_path: Path, no_browser: None, session: FakeSpotifySession
+) -> None:
+    logged_in(tmp_path, session).find_tracks("Kano", "Walk This Way!")
+
+    assert {urlparse(url).hostname for _, url, _ in session.requests} == {
+        "api.spotify.com"
+    }
+
+
+class FakeTime:
+    """A clock that moves only when osu-fy sleeps; notes when each request went out."""
+
+    def __init__(self, session: FakeSpotifySession) -> None:
+        self.now = 1000.0
+        self.sent: list[float] = []
+        original = session.request
+
+        def timed(*args: Any, **kwargs: Any) -> requests.Response:
+            self.sent.append(self.now)
+            return original(*args, **kwargs)
+
+        session.request = timed  # type: ignore[method-assign]
+
+    def clock(self) -> float:
+        return self.now
+
+    def sleep(self, seconds: float) -> None:
+        assert seconds > 0
+        self.now += seconds
+
+
+def test_US_05_9_at_least_1_second_between_requests_and_at_most_30_in_30_seconds(
+    tmp_path: Path, no_browser: None, session: FakeSpotifySession
+) -> None:
+    time = FakeTime(session)
+    save_token(tmp_path, ACCESS, expires_at=0)  # the refresh is paced too (Q4 of #9)
+    adapter = spotify(tmp_path, session, time.clock, time.sleep)
+    adapter.log_in(CLIENT_ID, keep_waiting)
+    adapter.create_playlist("osu!fy")
+    for n in range(40):
+        adapter.find_tracks("Kano", f"Song {n}")
+
+    assert len(time.sent) == 43  # refresh, /v1/me, the Playlist, 40 searches
+    assert all(b - a >= 1 for a, b in zip(time.sent, time.sent[1:], strict=False))
+    assert max(sum(s <= t < s + 30 for t in time.sent) for s in time.sent) <= 30
+
+
+def test_US_05_9_no_wait_when_a_second_has_passed_already(
+    tmp_path: Path, no_browser: None, session: FakeSpotifySession
+) -> None:
+    time = FakeTime(session)
+    adapter = spotify(tmp_path, session, time.clock, time.sleep)
+    logged_in(tmp_path, session, adapter)
+    time.now += 5  # the Player took 5 s to answer a question
+
+    adapter.find_tracks("Kano", "Walk This Way!")
+
+    assert time.sent[-1] - time.sent[-2] == 5
+
+
+@pytest.mark.parametrize(
+    ("retry_after", "shown"),
+    [
+        ("30", "Spotify asks us to wait 30 s"),
+        ("120", "Spotify asks us to wait 120 s"),
+        ("121", "Spotify asks us to wait 3 min"),
+        ("720", "Spotify asks us to wait 12 min"),
+        ("18180", "Spotify asks us to wait 5 h 3 min"),
+        ("18001", "Spotify asks us to wait 5 h 1 min"),
+        ("", "Spotify asks us to wait."),
+    ],
+)
+def test_US_05_11_too_many_requests_stops_without_waiting(
+    tmp_path: Path,
+    no_browser: None,
+    session: FakeSpotifySession,
+    retry_after: str,
+    shown: str,
+) -> None:
+    adapter = logged_in(tmp_path, session)
+    session.retry_after = retry_after
+
+    with pytest.raises(StreamingServiceUnavailable) as stop:
+        adapter.find_tracks("Kano", "Walk This Way!")
+
+    assert str(stop.value) == shown
+    assert len(session.requests) == 1  # no hidden retry
+
+
+@pytest.mark.parametrize("call", ["log in", "create", "find"])
+def test_US_05_11_too_many_requests_stops_every_call(
+    tmp_path: Path, no_browser: None, session: FakeSpotifySession, call: str
+) -> None:
+    if call == "log in":
+        save_token(tmp_path, ACCESS, expires_at=2**40)
+        session.retry_after = "30"
+        with pytest.raises(StreamingServiceUnavailable) as stop:
+            spotify(tmp_path, session).log_in(CLIENT_ID, keep_waiting)
+    else:
+        adapter = logged_in(tmp_path, session)
+        session.retry_after = "30"
+        with pytest.raises(StreamingServiceUnavailable) as stop:
+            if call == "create":
+                adapter.create_playlist("osu!fy")
+            else:
+                adapter.find_playlist("mine")
+
+    assert str(stop.value) == "Spotify asks us to wait 30 s"

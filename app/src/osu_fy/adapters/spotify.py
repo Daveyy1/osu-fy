@@ -2,10 +2,11 @@
 
 import json
 import logging
+import math
 import secrets
 import time
 import webbrowser
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Mapping
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
@@ -15,7 +16,12 @@ import spotipy
 from spotipy.cache_handler import CacheHandler
 from spotipy.oauth2 import SpotifyOauthError, SpotifyPKCE, start_local_http_server
 
-from osu_fy.core.ports import LoginIncomplete, Playlist, StreamingServiceUnavailable
+from osu_fy.core.ports import (
+    LoginIncomplete,
+    Playlist,
+    StreamingServiceUnavailable,
+    Track,
+)
 
 PORT = 8765
 REDIRECT_URI = f"http://127.0.0.1:{PORT}/callback"
@@ -26,6 +32,7 @@ REQUEST_TIMEOUT = 10  # seconds (api_contracts)
 CANT_REACH = "Can't reach Spotify. Everything found so far is kept; try again later."
 PORT_IN_USE = f"Port {PORT} is in use; is osu-fy already running?"
 DESCRIPTION = "Songs from osu!, added by osu-fy"
+GAP = 1.0  # seconds between two requests; also keeps to 30 in any 30 s (US-05.9)
 
 # spotipy logs the Authorization header and token requests at DEBUG (N3); a level,
 # unlike `disabled`, also holds for its child loggers spotipy.client and spotipy.oauth2
@@ -54,16 +61,43 @@ class TokenFile(CacheHandler):  # type: ignore[misc]  # spotipy has no type hint
         temporary.replace(self._app_data / "spotify-token.json")
 
 
+class PacedSession(requests.Session):
+    """Every request, login and API alike, starts at least GAP after the last one ended."""
+
+    def __init__(
+        self,
+        inner: requests.Session,
+        clock: Callable[[], float],
+        sleep: Callable[[float], None],
+    ) -> None:
+        super().__init__()
+        self._inner = inner
+        self._clock = clock
+        self._sleep = sleep
+        self._last: float | None = None
+
+    def request(  # type: ignore[override]  # spotipy passes all but method and url by keyword
+        self, method: str, url: str, **kwargs: Any
+    ) -> requests.Response:
+        if self._last is not None and (wait := self._last + GAP - self._clock()) > 0:
+            self._sleep(wait)
+        try:
+            return self._inner.request(method, url, **kwargs)
+        finally:
+            self._last = self._clock()
+
+
 class Spotify:
     def __init__(
         self,
         app_data: Path,
         session: requests.Session | None = None,
         clock: Callable[[], float] = time.monotonic,
+        sleep: Callable[[float], None] = time.sleep,
     ) -> None:
         self._tokens = TokenFile(app_data)
         # a plain Session never retries, so spotipy never sleeps silently on a 429 (ADR-004)
-        self._session = session or requests.Session()
+        self._session = PacedSession(session or requests.Session(), clock, sleep)
         self._clock = clock
         self._client: spotipy.Spotify | None = None
 
@@ -108,6 +142,23 @@ class Spotify:
                 page = client.next(page)  # None after the last page
         return None
 
+    def find_tracks(self, artist: str, title: str) -> list[Track]:
+        # a double quote would end the filter early
+        query = f'track:"{title.replace('"', "")}" artist:"{artist.replace('"', "")}"'
+        with _reachable():
+            found = self._logged_in().search(query, limit=10, type="track")
+        return [
+            Track(
+                item["id"],
+                item["name"],
+                tuple(artist["name"] for artist in item["artists"]),
+                item["album"]["name"],
+                item["duration_ms"],
+            )
+            for item in found["tracks"]["items"]
+            if item  # null for an item Spotify cannot show
+        ]
+
     def _logged_in(self) -> spotipy.Spotify:
         assert self._client is not None, "log_in comes first in every Session"
         return self._client
@@ -151,15 +202,34 @@ class Spotify:
 
 @contextmanager
 def _reachable() -> Iterator[None]:
-    """No network, a timeout or a 5xx stops the Session with CANT_REACH (US-03.8)."""
+    """No network, a timeout or a 5xx stops the Session with CANT_REACH (US-03.8);
+    a 429 stops it with the wait Spotify asks for, never sleeping on it (US-05.11)."""
     try:
         yield
     except (requests.ConnectionError, requests.Timeout) as error:
         raise StreamingServiceUnavailable(CANT_REACH) from error
     except spotipy.SpotifyException as error:
+        if error.http_status == 429:
+            raise StreamingServiceUnavailable(
+                _wait_asked(error.headers or {})
+            ) from error
         if error.http_status >= 500:
             raise StreamingServiceUnavailable(CANT_REACH) from error
         raise
+
+
+def _wait_asked(headers: Mapping[str, str]) -> str:
+    """The stop line for a 429: seconds up to 120 s, else rounded up to minutes (Q5 of #9)."""
+    try:
+        seconds = int(headers["Retry-After"])
+    except (KeyError, ValueError):
+        return "Spotify asks us to wait."
+    if seconds <= 120:
+        return f"Spotify asks us to wait {seconds} s"
+    hours, minutes = divmod(math.ceil(seconds / 60), 60)
+    if hours == 0:
+        return f"Spotify asks us to wait {minutes} min"
+    return f"Spotify asks us to wait {hours} h {minutes} min"
 
 
 def _playlist(item: dict[str, Any]) -> Playlist:
