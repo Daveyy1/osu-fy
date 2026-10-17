@@ -1,9 +1,14 @@
+import json
+from pathlib import Path
+
+import pytest
 from fake_streaming import FakeStreaming
 from scripted_player import ScriptedPlayer
 
+from osu_fy.adapters.lazer import LazerSource
 from osu_fy.core.matching import match_songs
 from osu_fy.core.ports import Track
-from osu_fy.core.songs import Beatmapset, Song, song_key
+from osu_fy.core.songs import Beatmapset, Song, read_songs, song_key
 
 KERO = Beatmapset(
     1670776, "Silver Forest", "Silver Forest", "Kero (9) destiny", "ケロ⑨destiny"
@@ -111,3 +116,29 @@ def test_US_05_10_the_summary_counts_certain_doubtful_and_unmatched() -> None:
     match_songs([song(WALK), song(KERO), song(JUMP)], streaming, player)
 
     assert player.shown == ["2 Certain matches, 0 Doubtful matches, 1 Unmatched Songs"]
+
+
+RECORDINGS = Path(__file__).parent / "recordings" / "searches.json"
+
+
+@pytest.mark.skipif(
+    not RECORDINGS.exists(),
+    reason="no local recordings (Q1 of #9): run tests/record_searches.py",
+)
+def test_US_05_3_and_US_05_7_on_spotifys_recorded_answers_for_the_sample_songs(
+    tmp_path: Path,
+) -> None:
+    streaming = FakeStreaming()
+    for answer in json.loads(RECORDINGS.read_text("utf-8")):
+        tracks = [
+            Track(**(t | {"artists": tuple(t["artists"])})) for t in answer["tracks"]
+        ]
+        streaming.searches[(answer["artist"], answer["title"])] = tracks
+    sample = Path(__file__).parent / "sample-lazer"
+    songs = read_songs(LazerSource(tmp_path), ScriptedPlayer(), sample)
+
+    matches, unmatched = match_songs(songs, streaming, ScriptedPlayer())
+
+    certain = {m.song.key for m in matches if m.certain}
+    assert ("silver forest", "kero (9) destiny") in certain
+    assert ("various artist", "jump training #1") in {song.key for song in unmatched}
