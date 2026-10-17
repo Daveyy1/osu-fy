@@ -1,4 +1,5 @@
 import msvcrt
+import re
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -346,4 +347,26 @@ def test_US_04_1_04_2_and_04_4_messages_reach_the_screen() -> None:
         "Created your Playlist [b]osu!fy https://open.spotify.com/playlist/pl\n"
         "Adding to your Playlist [b]osu!fy https://open.spotify.com/playlist/pl\n"
         "Your Playlist is no longer in your Spotify library.\n"
+    )
+
+
+def test_US_05_8_search_bar_counts_songs_and_shows_the_elapsed_time() -> None:
+    console = Console(record=True, width=80)
+    player = TerminalPlayer(console)
+
+    for done in range(1, 293):
+        player.show_songs_searched(done, 292)
+
+    last = console.export_text().rstrip().splitlines()[-1]
+    assert last.startswith("Searching Spotify 292/292 ")
+    assert re.search(r" \d:\d\d:\d\d$", last)  # elapsed, e.g. 0:09:47
+
+
+def test_US_05_10_the_summary_reaches_the_screen() -> None:
+    console = Console(record=True, width=80)
+
+    TerminalPlayer(console).show_match_summary(154, 0, 138)
+
+    assert console.export_text() == (
+        "154 Certain matches, 0 Doubtful matches, 138 Unmatched Songs\n"
     )

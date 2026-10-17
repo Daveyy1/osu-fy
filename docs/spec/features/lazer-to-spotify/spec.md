@@ -274,11 +274,11 @@ Streaming service port has no remove or reorder operation (N1).
 
 **Recorded answers:** real Spotify search results for the sample Songs and
 the quality set, saved once through the real adapter by a small recording
-command and stored next to the tests. The fake fails loudly on a query it
-has no recording for. The repository is public, so recordings and the
-quality set are trimmed to what the tests need (see "Test data in the
-repository" in `constraints.md`); whether Spotify's developer terms allow
-committing them is checked in US-05's plan.
+command into a git-ignored folder next to the tests (Spotify's terms do not
+allow committing them, see "Test data in the repository" in
+`constraints.md`). The tests that need them are skipped when the folder is
+absent; tests that run in CI use hand-written Tracks. The fake fails loudly
+on a query it has no answer for.
 
 **Where mocks could hide failures:** Spotify's real ranking and catalogue
 (recordings go stale), the real browser login, Spotify's real rate limiting,

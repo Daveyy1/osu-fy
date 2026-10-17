@@ -5,7 +5,7 @@ from pathlib import Path
 
 import readchar
 from rich.console import Console
-from rich.progress import BarColumn, Progress, TextColumn
+from rich.progress import BarColumn, Progress, TextColumn, TimeElapsedColumn
 
 from osu_fy.core.ports import PlayerQuit, Playlist
 
@@ -142,6 +142,28 @@ class TerminalPlayer:
 
     def show_playlist_gone(self) -> None:
         self._say("Your Playlist is no longer in your Spotify library.")
+
+    def show_songs_searched(self, done: int, total: int) -> None:
+        if self._progress is None:
+            # rich redraws by itself, so the elapsed time also moves during the pacing waits
+            self._progress = Progress(
+                TextColumn("Searching Spotify {task.completed}/{task.total}"),
+                BarColumn(),
+                TimeElapsedColumn(),
+                console=self._console,
+            )
+            self._progress.add_task("", total=total)
+            self._progress.start()
+        self._progress.update(self._progress.task_ids[0], completed=done)
+        if done == total:
+            self._progress.stop()
+            self._progress = None
+
+    def show_match_summary(self, certain: int, doubtful: int, unmatched: int) -> None:
+        self._say(
+            f"{certain} Certain matches, {doubtful} Doubtful matches, "
+            f"{unmatched} Unmatched Songs"
+        )
 
     def _say(self, text: str, end: str = "\n") -> None:
         # A path prints as it is: "[old]" is no markup, and the terminal wraps it

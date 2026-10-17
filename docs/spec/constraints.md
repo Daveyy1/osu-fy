@@ -49,11 +49,13 @@ of remaining prose intention.*
   quality set and the recorded Spotify answers hold only what the tests
   need: artist, title, Beatmapset id, Spotify Track id, and for recordings
   the Track fields of the port (title, artists, album, length). No playlist
-  ids, no account or profile data, no tokens, no request headers. Whether
-  Spotify's developer terms allow committing recorded responses is checked
-  in US-05's plan; if they do not, the recordings and the quality set move
-  to a git-ignored local folder and the tests that need them are skipped
-  when it is absent.
+  ids, no account or profile data, no tokens, no request headers. Spotify's
+  Developer Terms (IV.3.1.a, IV.3.2.a, effective 15 May 2025) forbid storing
+  compilations of Spotify Content beyond operating the app, so the
+  recordings and the quality set live in a git-ignored local folder
+  (`app/tests/recordings/`), and the tests that need them are skipped when
+  it is absent (Q1 of #9). Tests that run in CI use hand-written Tracks:
+  artist and title from the osu! metadata, made-up ids.
 - GDPR: osu-fy processes the Player's own data on the Player's own machine
   and sends it only to Spotify at the Player's request. No further duties
   for a tool without a server.

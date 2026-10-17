@@ -24,13 +24,13 @@ class Song:
     beatmapsets: tuple[Beatmapset, ...]
 
 
-def _normal(text: str) -> str:
+def normal(text: str) -> str:
     """Case, full width and extra spaces ignored (US-02.3)."""
     return " ".join(unicodedata.normalize("NFKC", text).casefold().split())
 
 
 CUT_MARKERS = tuple(
-    _normal(marker)
+    normal(marker)
     for marker in (
         "(TV Size)",
         "(TV Size Ver.)",
@@ -42,12 +42,20 @@ CUT_MARKERS = tuple(
 )
 
 
-def song_key(beatmapset: Beatmapset) -> tuple[str, str]:
-    """Artist and title as compared: romanised first (Q1 of #6), cut markers removed."""
-    title = _normal(beatmapset.title or beatmapset.title_original)
+def normal_title(text: str) -> str:
+    """A title as compared: normal, cut markers removed (US-02.3)."""
+    title = normal(text)
     for marker in CUT_MARKERS:
         title = title.replace(marker, " ")
-    return _normal(beatmapset.artist or beatmapset.artist_original), _normal(title)
+    return normal(title)
+
+
+def song_key(beatmapset: Beatmapset) -> tuple[str, str]:
+    """Artist and title as compared: romanised first (Q1 of #6), cut markers removed."""
+    return (
+        normal(beatmapset.artist or beatmapset.artist_original),
+        normal_title(beatmapset.title or beatmapset.title_original),
+    )
 
 
 def read_songs(source: "Source", player: "Player", folder: Path) -> list[Song]:

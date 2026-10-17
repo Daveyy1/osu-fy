@@ -10,6 +10,7 @@ class ScriptedPlayer:
         self.answers = list(answers)
         self.shown: list[str] = []
         self.files_read: list[tuple[int, int]] = []
+        self.songs_searched: list[tuple[int, int]] = []
 
     def greet(self) -> None:
         self.shown.append("greet")
@@ -87,6 +88,15 @@ class ScriptedPlayer:
 
     def show_playlist_gone(self) -> None:
         self.shown.append("Your Playlist is no longer in your Spotify library.")
+
+    def show_songs_searched(self, done: int, total: int) -> None:
+        self.songs_searched.append((done, total))
+
+    def show_match_summary(self, certain: int, doubtful: int, unmatched: int) -> None:
+        self.shown.append(
+            f"{certain} Certain matches, {doubtful} Doubtful matches, "
+            f"{unmatched} Unmatched Songs"
+        )
 
     def _next(self) -> bool | str | None:
         assert self.answers, "osu-fy asked more than the script answers"
