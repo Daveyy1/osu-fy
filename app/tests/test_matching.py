@@ -8,7 +8,14 @@ from scripted_player import ScriptedPlayer
 from osu_fy.adapters.lazer import LazerSource
 from osu_fy.core.matching import match_songs
 from osu_fy.core.ports import Track
-from osu_fy.core.songs import Beatmapset, Song, read_songs, song_key
+from osu_fy.core.songs import (
+    Beatmapset,
+    Song,
+    normal,
+    normal_title,
+    read_songs,
+    song_key,
+)
 
 KERO = Beatmapset(
     1670776, "Silver Forest", "Silver Forest", "Kero (9) destiny", "ケロ⑨destiny"
@@ -360,3 +367,164 @@ def test_nothing_close_is_an_unmatched_song() -> None:
     }
 
     assert matched(GREETINGS, searches) == []
+
+
+def test_a_swapped_name_order_is_doubtful() -> None:
+    redo = Beatmapset(437055, "Suzuki Konomi", "鈴木このみ", "Redo", "Redo")
+    searches = {
+        ("Suzuki Konomi", "Redo"): [track("Redo", "Konomi Suzuki")],
+        ("鈴木このみ", "Redo"): [],
+    }
+
+    assert matched(redo, searches) == [("Redo", False)]
+
+
+def test_US_05_5_the_base_title_drops_every_version_marker() -> None:
+    sorry = Beatmapset(
+        2449469,
+        "Demi Lovato",
+        "Demi Lovato",
+        "Sorry Not Sorry (Rock Ver.) (Nightcore & Cut Ver.)",
+        "Sorry Not Sorry (Rock Ver.) (Nightcore & Cut Ver.)",
+    )
+    searches = {
+        ("Demi Lovato", sorry.title): [],
+        ("Demi Lovato", "Sorry Not Sorry"): [track("Sorry Not Sorry", "Demi Lovato")],
+    }
+
+    assert matched(sorry, searches) == [("Sorry Not Sorry", False)]
+
+
+def test_a_close_artist_with_the_base_title_is_doubtful() -> None:
+    backstabber = Beatmapset(
+        1217044,
+        "Ke$ha",
+        "Ke$ha",
+        "Backstabber (Sped Up & Cut Ver.)",
+        "Backstabber (Sped Up & Cut Ver.)",
+    )
+    searches = {
+        ("Ke$ha", backstabber.title): [],
+        ("Ke$ha", "Backstabber"): [track("Backstabber", "Kesha")],
+    }
+
+    assert matched(backstabber, searches) == [("Backstabber", False)]
+
+
+def test_US_05_5_the_original_without_extra_artists_wins_a_tie() -> None:
+    poison = Beatmapset(
+        2281428,
+        "Groove Coverage",
+        "Groove Coverage",
+        "Poison (Nightcore & Cut Ver.)",
+        "Poison (Nightcore & Cut Ver.)",
+    )
+    searches = {
+        ("Groove Coverage", poison.title): [],
+        ("Groove Coverage", "Poison"): [
+            track("Poison", "AXMO", "Groove Coverage"),
+            track("Poison", "Groove Coverage"),
+        ],
+    }
+    streaming = FakeStreaming()
+    streaming.searches = searches
+
+    matches, _ = match_songs([song(poison)], streaming, ScriptedPlayer())
+
+    assert [(m.track.artists, m.certain) for m in matches] == [
+        (("Groove Coverage",), False)
+    ]
+
+
+def test_a_spelling_variant_of_the_artist_is_doubtful() -> None:
+    day = Beatmapset(
+        459293, "Porno Graffitti", "ポルノグラフィティ", "THE DAY", "THE DAY"
+    )
+    searches = {
+        ("Porno Graffitti", "THE DAY"): [track("THE DAY", "PornoGraffitti")],
+        ("ポルノグラフィティ", "THE DAY"): [],
+    }
+
+    assert matched(day, searches) == [("THE DAY", False)]
+
+
+def test_US_05_5_the_plain_original_wins_over_another_version_of_it() -> None:
+    poison = Beatmapset(
+        2281428,
+        "Groove Coverage",
+        "Groove Coverage",
+        "Poison (Nightcore & Cut Ver.)",
+        "Poison (Nightcore & Cut Ver.)",
+    )
+    searches = {
+        ("Groove Coverage", poison.title): [],
+        ("Groove Coverage", "Poison"): [
+            track("Poison - Radio Edit", "Groove Coverage"),
+            track("Poison", "Groove Coverage"),
+        ],
+    }
+
+    assert matched(poison, searches) == [("Poison", False)]
+
+
+QUALITY_SET = Path(__file__).parent / "recordings" / "quality_set.json"
+# old matches and confirmed Songs no rule reaches, approved in the pull request (Q10 of #10)
+EXCEPTIONS = {
+    2077229: "the same recording as the old Track (ISRC JPPO02302806), titled 唱",
+    1085435: "the same recording as the old Track (ISRC JPTF01914601), titled レーゾンデートル",
+    999645: "the same recording as the old Track (ISRC JPPO01902850), titled インフェルノ",
+    513590: "Spotify's filter search never returns Zenzenzense - movie ver. (other romanisation)",
+    593620: "Spotify's filter search never returns Shinzo wo Sasageyo ! (other romanisation)",
+}
+
+
+def recorded() -> FakeStreaming:
+    streaming = FakeStreaming()
+    for answer in json.loads(RECORDINGS.read_text("utf-8")):
+        tracks = [
+            Track(**(t | {"artists": tuple(t["artists"])})) for t in answer["tracks"]
+        ]
+        streaming.searches[(answer["artist"], answer["title"])] = tracks
+    return streaming
+
+
+def same_track(track: Track, entry: dict[str, object]) -> bool:
+    """The same id, or another release with the same title and artists (Q4 of #10)."""
+    artists = entry["track_artists"]
+    assert isinstance(artists, list)
+    return track.id == entry["track_id"] or (
+        normal_title(track.title) == normal_title(str(entry["track_title"]))
+        and {normal(a) for a in track.artists} == {normal(str(a)) for a in artists}
+    )
+
+
+@pytest.mark.skipif(
+    not QUALITY_SET.exists(),
+    reason="no local quality set (Q1 of #9): run tests/record_searches.py <export folder>",
+)
+def test_US_05_12_the_quality_set() -> None:
+    streaming = recorded()
+    fields = ("online_id", "artist", "artist_original", "title", "title_original")
+    wrong: list[object] = []
+    lost: list[object] = []
+    unmatched_old: set[tuple[str, str]] = set()
+    old: set[tuple[str, str]] = set()
+    for entry in json.loads(QUALITY_SET.read_text("utf-8")):
+        beatmapset = Beatmapset(*(entry[f] for f in fields))
+        matches, _ = match_songs([song(beatmapset)], streaming, ScriptedPlayer())
+        match = matches[0] if matches else None
+        if entry["kind"] == "old unmatched":
+            old.add(song_key(beatmapset))
+            if match is None:
+                unmatched_old.add(song_key(beatmapset))
+        elif entry["online_id"] in EXCEPTIONS:
+            continue
+        elif match is None or not same_track(match.track, entry):
+            (wrong if match and match.certain else lost).append(entry["title"])
+
+    print(
+        f"Unmatched among the old Unmatched Songs: {len(unmatched_old)} of {len(old)}"
+    )
+    assert wrong == []  # no wrong Certain match
+    assert lost == []  # every old match and confirmed Song keeps its Track
+    assert len(unmatched_old) < len(old)

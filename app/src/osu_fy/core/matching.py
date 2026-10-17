@@ -4,14 +4,14 @@ import re
 from collections.abc import Iterator
 from dataclasses import dataclass
 
-from rapidfuzz.fuzz import ratio
+from rapidfuzz.fuzz import ratio, token_sort_ratio
 
 from osu_fy.core.ports import Player, StreamingService, Track
 from osu_fy.core.songs import CUT_MARKER, Song, normal, normal_title
 
-DOUBTFUL = (
-    80  # lowest rapidfuzz ratio of artist and title for a Doubtful match (Q9 of #10)
-)
+# the lowest score of artist and title for a Doubtful match: the highest value that
+# keeps every quality-set Song at least Doubtful, measured 2026-10-17 (Q9 of #10)
+DOUBTFUL = 80
 # ` x ` only with spaces around it, so a name like "Xion" is never split (Q6 of #10)
 CREDIT = re.compile(r" (?:feat\.?|ft\.?|&|x|\+) |, ", re.IGNORECASE)
 FEAT = re.compile(
@@ -22,7 +22,7 @@ SAME_RECORDING = re.compile(
     r" - (?:(?:\d{4} )?remaster(?:ed)?(?: \d{4})?|original mix)$"
 )
 NOT_A_SONG = re.compile(r"instrumental|\binst\b|off vocal|karaoke|カラオケ")
-VERSION = re.compile(r" ?\(([^)]*)\)$")
+VERSION = re.compile(r"(?: ?\([^)]*\))+$")  # every trailing version marker
 
 
 @dataclass(frozen=True)
@@ -102,11 +102,19 @@ def _score(song: Song, track: Track) -> bool | float:
     if same_artist and track_title in titles:
         return True
     if same_artist and _base(track_title) in {_base(t) for t in titles}:
-        return 100.0  # another version, or the original of a remix (US-05.4, US-05.5)
+        # another version, or the original of a remix (US-05.4, US-05.5); a tie goes to
+        # the plain title, then to no extra artists: Poison, not Poison - Radio Edit
+        return 100.0 - (track_title != _base(track_title)) - (not artists <= names) / 2
     if not names or not artists or not titles:
         return False
-    artist_score = max(ratio(n, a) for n in names for a in artists)
-    title_score = max(ratio(t, track_title) for t in titles)
+    # token_sort for names in either order (Suzuki Konomi), ratio for PornoGraffitti
+    artist_score = max(
+        max(ratio(n, a), token_sort_ratio(n, a)) for n in names for a in artists
+    )
+    bases = titles | {_base(t) for t in titles}
+    title_score = max(
+        ratio(t, x) for t in bases for x in (track_title, _base(track_title))
+    )
     score = min(artist_score, title_score)
     return score if score >= DOUBTFUL else False
 
