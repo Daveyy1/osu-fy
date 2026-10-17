@@ -31,9 +31,10 @@ def normal(text: str) -> str:
 
 
 _CUT = r"(?:tv ?size(?: ver\.?)?|tv ?edit\.?|tv ?mix|anime ?size|cut ver\.?|short ver\.?|tvサイズ)"
-# in (), [], -…-, ~…~ or after " - "; full-width forms are normal width by then (Q5 of #10)
+# in (), [], -…-, ~…~ or after " - " (Q5 of #10); full-width forms too, for the query
 CUT_MARKER = re.compile(
-    rf" ?(?:\( ?{_CUT} ?\)|\[ ?{_CUT} ?\]|- ?{_CUT} ?-|~ ?{_CUT} ?~| - {_CUT}$)",
+    rf" ?(?:[(（] ?{_CUT} ?[)）]|[\[［] ?{_CUT} ?[\]］]|- ?{_CUT} ?-|[~～] ?{_CUT} ?[~～]"
+    rf"| - {_CUT}$)",
     re.IGNORECASE,
 )
 

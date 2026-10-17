@@ -78,16 +78,17 @@ def test_US_05_7_another_artist_or_another_title_is_never_certain() -> None:
     streaming = FakeStreaming()
     streaming.searches = {
         ("Kano", "Walk This Way!"): [
-            track("Walk This Way!", "Aerosmith"),  # a cover, US-05.6 in #10
-            track("Walk This Way! - Extended Mix", "Kano"),  # Doubtful in #10
+            track("Walk This Way!", "Aerosmith"),  # a cover (US-05.6)
+            track("Walk This Way! - Extended Mix", "Kano"),  # Doubtful (US-05.4)
         ],
         ("鹿乃", "Walk This Way!"): [],
     }
 
-    matches, unmatched = match_songs([song(WALK)], streaming, ScriptedPlayer())
+    matches, _ = match_songs([song(WALK)], streaming, ScriptedPlayer())
 
-    assert matches == []
-    assert unmatched == [song(WALK)]
+    assert [(m.track.title, m.certain) for m in matches] == [
+        ("Walk This Way! - Extended Mix", False)
+    ]
 
 
 def test_US_05_8_progress_counts_the_songs_searched() -> None:
@@ -142,3 +143,220 @@ def test_US_05_3_and_US_05_7_on_spotifys_recorded_answers_for_the_sample_songs(
     certain = {m.song.key for m in matches if m.certain}
     assert ("silver forest", "kero (9) destiny") in certain
     assert ("various artist", "jump training #1") in {song.key for song in unmatched}
+
+
+HANA = Beatmapset(
+    2083205,
+    "Ryokuoushoku Shakai",
+    "緑黄色社会",
+    "Hana ni Natte (TV Size)",
+    "花になって (TV Size)",
+)
+WORLD = Beatmapset(
+    438535, "NIGHTMARE", "ナイトメア", "the WORLD  ~TV Size~", "the WORLD ～TVサイズ～"
+)
+GREETINGS = Beatmapset(288974, "VINXIS", "VINXIS", "Greetings", "Greetings")
+SILHOUETTE = Beatmapset(399358, "KANA-BOON", "KANA-BOON", "Silhouette", "シルエット")
+ROCKEFELLER = Beatmapset(
+    942866,
+    "Getter Jaani",
+    "Getter Jaani",
+    "Rockefeller Street (Nightcore Mix)",
+    "Rockefeller Street (Nightcore Mix)",
+)
+MONSTER = Beatmapset(
+    157896, "Meg & Dia", "Meg & Dia", "Monster (DotEXE Remix)", "Monster (DotEXE Remix)"
+)
+
+
+def matched(
+    beatmapset: Beatmapset, searches: dict[tuple[str, str], list[Track]]
+) -> list[tuple[str, bool]]:
+    """The Match for one Song as (Track title, certain), or [] when it is Unmatched."""
+    streaming = FakeStreaming()
+    streaming.searches = searches
+    matches, _ = match_songs([song(beatmapset)], streaming, ScriptedPlayer())
+    return [(m.track.title, m.certain) for m in matches]
+
+
+def test_US_05_1_a_cut_marker_does_not_matter_and_stays_out_of_the_search() -> None:
+    assert matched(
+        HANA,
+        {
+            ("Ryokuoushoku Shakai", "Hana ni Natte"): [],
+            ("緑黄色社会", "花になって"): [track("花になって", "Ryokuoushoku Shakai")],
+        },
+    ) == [("花になって", True)]
+
+
+@pytest.mark.parametrize(
+    "title",
+    ["Hana ni Natte - TV Size", "Hana ni Natte -TV SIZE-", "Hana ni Natte (TV Size)"],
+)
+def test_US_05_1_spotifys_cut_suffixes_do_not_matter(title: str) -> None:
+    searches = {
+        ("Ryokuoushoku Shakai", "Hana ni Natte"): [track(title, "Ryokuoushoku Shakai")]
+    }
+
+    assert matched(HANA, searches) == [(title, True)]
+
+
+@pytest.mark.parametrize(
+    "title",
+    ["Greetings - Remastered", "Greetings - 2011 Remaster", "Greetings - Original Mix"],
+)
+def test_US_05_1_remaster_and_original_mix_are_the_same_recording(title: str) -> None:
+    assert matched(GREETINGS, {("VINXIS", "Greetings"): [track(title, "VINXIS")]}) == [
+        (title, True)
+    ]
+
+
+def test_US_05_2_artist_or_title_in_either_script_counts() -> None:
+    assert matched(
+        WORLD, {("NIGHTMARE", "the WORLD"): [track("the WORLD", "NIGHTMARE")]}
+    ) == [("the WORLD", True)]
+    assert matched(
+        SILHOUETTE, {("KANA-BOON", "Silhouette"): [track("シルエット", "KANA-BOON")]}
+    ) == [("シルエット", True)]
+
+
+def test_US_05_4_an_extended_mix_is_doubtful() -> None:
+    searches = {("VINXIS", "Greetings"): [track("Greetings - Extended Mix", "VINXIS")]}
+
+    assert matched(GREETINGS, searches) == [("Greetings - Extended Mix", False)]
+
+
+@pytest.mark.parametrize(
+    ("beatmapset", "exact", "base"),
+    [
+        (ROCKEFELLER, "Rockefeller Street - Nightcore Mix", "Rockefeller Street"),
+        (MONSTER, "Monster - DotEXE Remix", "Monster"),
+    ],
+)
+def test_US_05_5_the_exact_version_is_certain(
+    beatmapset: Beatmapset, exact: str, base: str
+) -> None:
+    searches = {
+        (beatmapset.artist, beatmapset.title): [track(exact, beatmapset.artist)]
+    }
+
+    assert matched(beatmapset, searches) == [(exact, True)]
+
+
+@pytest.mark.parametrize(
+    ("beatmapset", "base"),
+    [(ROCKEFELLER, "Rockefeller Street"), (MONSTER, "Monster")],
+)
+def test_US_05_5_only_the_original_is_doubtful_never_certain(
+    beatmapset: Beatmapset, base: str
+) -> None:
+    searches = {
+        (beatmapset.artist, beatmapset.title): [],
+        (beatmapset.artist, base): [track(base, beatmapset.artist)],  # the third search
+    }
+
+    assert matched(beatmapset, searches) == [(base, False)]
+
+
+def test_US_05_6_a_cover_by_another_artist_is_never_certain() -> None:
+    searches = {
+        ("KANA-BOON", "Silhouette"): [track("シルエット", "KANA-BOON Tribute")],
+        ("KANA-BOON", "シルエット"): [track("Silhouette", "Silhouette Covers")],
+    }
+
+    assert all(not certain for _, certain in matched(SILHOUETTE, searches))
+
+
+@pytest.mark.parametrize(
+    ("beatmapset", "query", "found"),
+    [
+        (
+            Beatmapset(
+                None,
+                "Razihel & Virtual Riot",
+                "Razihel & Virtual Riot",
+                "Highscore",
+                "Highscore",
+            ),
+            ("Razihel & Virtual Riot", "Highscore"),
+            track("Highscore", "Razihel", "Virtual Riot"),
+        ),
+        (
+            Beatmapset(
+                None,
+                "Pegboard Nerds",
+                "Pegboard Nerds",
+                "Gunslinga (feat. MC Mota)",
+                "Gunslinga (feat. MC Mota)",
+            ),
+            ("Pegboard Nerds", "Gunslinga"),
+            track("Gunslinga", "Pegboard Nerds", "MC Mota"),
+        ),
+        (
+            Beatmapset(
+                None,
+                "MIMI feat. Hatsune Miku",
+                "MIMI feat. 初音ミク",
+                "Ai no Sukima",
+                "哀の隙間",
+            ),
+            ("MIMI", "Ai no Sukima"),
+            track("哀の隙間", "MIMI", "初音ミク"),
+        ),
+        (
+            Beatmapset(
+                None,
+                "Station Earth",
+                "Station Earth",
+                "Cold Green Eyes ft. Roos Denayer",
+                "Cold Green Eyes ft. Roos Denayer",
+            ),
+            ("Station Earth", "Cold Green Eyes"),
+            track("Cold Green Eyes - Original Mix", "Station Earth", "Roos Denayer"),
+        ),
+    ],
+)
+def test_credits_split_across_the_tracks_artists_are_certain(
+    beatmapset: Beatmapset, query: tuple[str, str], found: Track
+) -> None:
+    assert matched(beatmapset, {query: [found]}) == [(found.title, True)]
+
+
+@pytest.mark.parametrize(
+    "title",
+    [
+        "Greetings (Instrumental)",
+        "Greetings - inst",
+        "Greetings (Off Vocal)",
+        "Greetings カラオケ",
+    ],
+)
+def test_instrumental_and_karaoke_tracks_are_never_a_match(title: str) -> None:
+    assert matched(GREETINGS, {("VINXIS", "Greetings"): [track(title, "VINXIS")]}) == []
+
+
+def test_a_close_artist_and_title_is_doubtful_by_score() -> None:
+    zense = Beatmapset(
+        513590,
+        "RADWIMPS",
+        "RADWIMPS",
+        "Zen Zen Zense (movie ver.)",
+        "前前前世 (movie ver.)",
+    )
+    searches = {
+        ("RADWIMPS", "Zen Zen Zense (movie ver.)"): [
+            track("Zenzenzense - movie ver.", "RADWIMPS")
+        ],
+        ("RADWIMPS", "前前前世 (movie ver.)"): [],
+        ("RADWIMPS", "Zen Zen Zense"): [],
+    }
+
+    assert matched(zense, searches) == [("Zenzenzense - movie ver.", False)]
+
+
+def test_nothing_close_is_an_unmatched_song() -> None:
+    searches = {
+        ("VINXIS", "Greetings"): [track("Completely Different", "Someone Else")]
+    }
+
+    assert matched(GREETINGS, searches) == []
