@@ -19,7 +19,7 @@ FEAT = re.compile(
     re.IGNORECASE,
 )
 SAME_RECORDING = re.compile(
-    r" - (?:(?:\d{4} )?remaster(?:ed)?(?: \d{4})?|original mix)$"
+    r" - (?:(?:\d{4} )?remaster(?:ed)?(?: \d{4})?|original mix|extended mix)$"
 )
 NOT_A_SONG = re.compile(r"instrumental|\binst\b|off vocal|karaoke|カラオケ")
 VERSION = re.compile(r"(?: ?\([^)]*\))+$")  # every trailing version marker
@@ -99,7 +99,8 @@ def _score(song: Song, track: Track) -> bool | float:
     }
     artists = {normal(artist) for artist in track.artists} - {""}
     same_artist = not names.isdisjoint(artists)
-    if same_artist and track_title in titles:
+    # the unstripped title too, so a `Greetings (Extended Mix)` Song keeps its own version
+    if same_artist and {track_title, _title(track.title)} & titles:
         return True
     if same_artist and _base(track_title) in {_base(t) for t in titles}:
         # another version, or the original of a remix (US-05.4, US-05.5); a tie goes to

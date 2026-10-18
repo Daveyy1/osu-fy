@@ -92,7 +92,7 @@ hand when you are done.
 | State | How |
 |-------|-----|
 | The search and its bar (US-05.8, US-05.10) | Start osu-fy with a login and a Playlist. After the Playlist line, "Searching Spotify <n>/<total>" counts up with the elapsed time, then the summary line follows. |
-| The matching rules (US-05.1 to US-05.7) | The sample lazer folder (see US-02) holds one Song per rule: 花になって (TV Size) and the WORLD ~TV Size~ (cuts, either script), ケロ⑨destiny (exact), Greetings (only an extended mix: Doubtful), Rockefeller Street (Nightcore Mix) and Monster (DotEXE Remix) (exact version, else the original as Doubtful), Walk This Way! (covers only), Jump Training #1 (nothing). Until US-07 and US-08 the terminal shows only the counts. |
+| The matching rules (US-05.1 to US-05.7) | The sample lazer folder (see US-02) holds one Song per rule: 花になって (TV Size) and the WORLD ~TV Size~ (cuts, either script), ケロ⑨destiny (exact), Greetings (only an extended mix: Certain), Rockefeller Street (Nightcore Mix) and Monster (DotEXE Remix) (exact version, else the original as Doubtful), Walk This Way! (covers only), Jump Training #1 (nothing). Until US-07 and US-08 the terminal shows only the counts. |
 | The quality set (US-05.12) | Below: `test_US_05_12_the_quality_set` replays it and prints "Unmatched among the old Unmatched Songs: <n> of <m>". |
 | The pace (US-05.9) | Your real lazer folder: about 300 Songs take minutes, not seconds. |
 | Too many requests (US-05.11) | Cannot be provoked safely by hand; automated tests only. |

@@ -86,7 +86,7 @@ def test_US_05_7_another_artist_or_another_title_is_never_certain() -> None:
     streaming.searches = {
         ("Kano", "Walk This Way!"): [
             track("Walk This Way!", "Aerosmith"),  # a cover (US-05.6)
-            track("Walk This Way! - Extended Mix", "Kano"),  # Doubtful (US-05.4)
+            track("Walk This Way! - Radio Edit", "Kano"),  # another version: Doubtful
         ],
         ("鹿乃", "Walk This Way!"): [],
     }
@@ -94,7 +94,7 @@ def test_US_05_7_another_artist_or_another_title_is_never_certain() -> None:
     matches, _ = match_songs([song(WALK)], streaming, ScriptedPlayer())
 
     assert [(m.track.title, m.certain) for m in matches] == [
-        ("Walk This Way! - Extended Mix", False)
+        ("Walk This Way! - Radio Edit", False)
     ]
 
 
@@ -150,10 +150,10 @@ def test_US_05_2_to_US_05_7_on_spotifys_recorded_answers_for_the_sample_songs(
     certain = {m.song.key for m in matches if m.certain}
     assert ("silver forest", "kero (9) destiny") in certain
     assert ("nightmare", "the world") in certain  # US-05.2
+    assert ("vinxis", "greetings") in certain  # US-05.4: only an extended mix
     assert ("various artist", "jump training #1") in {song.key for song in unmatched}
     # the five Song-identity cases on real answers: never a wrong Certain match
     doubtful_at_most = {
-        ("vinxis", "greetings"),  # US-05.4
         ("getter jaani", "rockefeller street (nightcore mix)"),  # US-05.5
         ("meg & dia", "monster (dotexe remix)"),  # US-05.5
         ("kano", "walk this way!"),  # US-05.6: covers only
@@ -236,10 +236,25 @@ def test_US_05_2_artist_or_title_in_either_script_counts() -> None:
     ) == [("シルエット", True)]
 
 
-def test_US_05_4_an_extended_mix_is_doubtful() -> None:
+def test_US_05_4_an_extended_mix_is_certain() -> None:
     searches = {("VINXIS", "Greetings"): [track("Greetings - Extended Mix", "VINXIS")]}
 
-    assert matched(GREETINGS, searches) == [("Greetings - Extended Mix", False)]
+    assert matched(GREETINGS, searches) == [("Greetings - Extended Mix", True)]
+
+
+def test_US_05_4_an_extended_mix_song_still_matches_its_own_version() -> None:
+    extended = Beatmapset(1, "VINXIS", "VINXIS", "Greetings (Extended Mix)", "")
+    exact = track("Greetings - Extended Mix", "VINXIS")
+    original = track("Greetings", "VINXIS")
+
+    assert matched(extended, {("VINXIS", "Greetings (Extended Mix)"): [exact]}) == [
+        ("Greetings - Extended Mix", True)
+    ]
+    only_original = {
+        ("VINXIS", "Greetings (Extended Mix)"): [],
+        ("VINXIS", "Greetings"): [original],
+    }
+    assert matched(extended, only_original) == [("Greetings", False)]
 
 
 @pytest.mark.parametrize(
