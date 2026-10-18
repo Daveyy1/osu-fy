@@ -94,8 +94,8 @@ Matching
     romanised) to count, so that Japanese Songs are found.
 23. As a Player, I want an exact match to always be Certain, so that it is
     not sent to the Review for no reason.
-24. As a Player, I want an extended mix to be Doubtful, so that I decide
-    whether I want that cut.
+24. As a Player, I want an extended mix to be Certain, so that the same
+    Song is not sent to the Review for no reason (owner, 2026-10-18).
 25. As a Player, I want the exact remix or Nightcore version found if it is
     on Spotify, and the original only offered as Doubtful, so that I get
     what I played whenever possible.
@@ -224,15 +224,16 @@ Sharing
   ` feat `, ` & `, ` x `, `, ` and ` + `, Q6 of #10), and the Track's title
   equals the Song's title after removing cut markers on both sides
   (including Spotify's `- TV Size` style suffixes), `(feat. …)` and
-  `ft. …` credits on both sides, and remaster and `- Original Mix`
-  suffixes on the Track's side (`- Remastered`, `- 2011 Remaster`): those
-  are the same recording (Q7). A version marker reads the same in brackets
+  `ft. …` credits on both sides, and remaster, `- Original Mix` and
+  `- Extended Mix` suffixes on the Track's side (`- Remastered`,
+  `- 2011 Remaster`): those are the same recording (Q7), or the same Song
+  (an extended mix, owner, 2026-10-18). A version marker reads the same in brackets
   or after ` - `.
 - **Never a Match:** a Track whose title says `instrumental`, `inst`,
   `off vocal`, `karaoke` or `カラオケ`, unless the Song's title says the
   same (Q8 of #10).
 - **Doubtful:** the same artist and the base title with an extra version
-  (extended mix, other mix), the original for a remix or Nightcore Song, or
+  (radio edit, other mix), the original for a remix or Nightcore Song, or
   a close but not equal artist and title by a similarity score (rapidfuzz).
   The score is the lower of the artist score (the better of rapidfuzz's
   `ratio` and `token_sort_ratio`, so names in either order count) and the

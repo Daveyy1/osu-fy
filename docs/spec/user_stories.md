@@ -215,7 +215,8 @@ The automated tests use recorded Spotify answers.
 - **US-05.3** Given Silver Forest – ケロ⑨destiny and a Track with exactly that
   artist and title, then it is a **Certain match**.
 - **US-05.4** Given VINXIS – Greetings and only a Track "Greetings -
-  Extended Mix" by VINXIS, then it is a **Doubtful match**.
+  Extended Mix" by VINXIS, then it is a **Certain match**: an extended mix
+  is the same Song, not a wrong one (owner, 2026-10-18).
 - **US-05.5** Given Rockefeller Street (Nightcore Mix) or Monster (DotEXE
   Remix): if a Track with that exact version exists, it is a **Certain
   match**; if only the original exists, the original is a **Doubtful
