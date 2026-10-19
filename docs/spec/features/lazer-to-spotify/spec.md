@@ -94,8 +94,8 @@ Matching
     romanised) to count, so that Japanese Songs are found.
 23. As a Player, I want an exact match to always be Certain, so that it is
     not sent to the Review for no reason.
-24. As a Player, I want an extended mix to be Doubtful, so that I decide
-    whether I want that cut.
+24. As a Player, I want an extended mix to be Certain, so that the same
+    Song is not sent to the Review for no reason (owner, 2026-10-18).
 25. As a Player, I want the exact remix or Nightcore version found if it is
     on Spotify, and the original only offered as Doubtful, so that I get
     what I played whenever possible.
@@ -216,18 +216,30 @@ Sharing
 **Matching rules:**
 - Search order for a Song: the romanised artist and title; then the
   original script if different; for a remix or Nightcore Song, the base
-  title without the version marker last. Stop at the first Certain match.
+  title without the version marker last. Cut markers and `feat.` credits
+  are left out of the query. Stop at the first Certain match.
   One to three searches per Song.
-- **Certain:** one of the Track's artists equals the Song's artist in either
-  script (credits after `feat.`, `ft.`, `&` or `x` may be split across the
-  Track's artists), and the Track's title equals the Song's title after
-  removing cut markers on both sides (including Spotify's `- TV Size`
-  style suffixes) and remaster suffixes on the Track's side (`- Remastered`,
-  `- 2011 Remaster`): a remaster is the same recording.
+- **Certain:** the Song's first credit is one of the Track's artists, in
+  either script (the Song's artist is split at ` feat. `, ` ft. `,
+  ` feat `, ` & `, ` x `, `, ` and ` + `, Q6 of #10), and the Track's title
+  equals the Song's title after removing cut markers on both sides
+  (including Spotify's `- TV Size` style suffixes), `(feat. …)` and
+  `ft. …` credits on both sides, and remaster, `- Original Mix` and
+  `- Extended Mix` suffixes on the Track's side (`- Remastered`,
+  `- 2011 Remaster`): those are the same recording (Q7), or the same Song
+  (an extended mix, owner, 2026-10-18). A version marker reads the same in brackets
+  or after ` - `.
+- **Never a Match:** a Track whose title says `instrumental`, `inst`,
+  `off vocal`, `karaoke` or `カラオケ`, unless the Song's title says the
+  same (Q8 of #10).
 - **Doubtful:** the same artist and the base title with an extra version
-  (extended mix, other mix), the original for a remix or Nightcore Song, or
+  (radio edit, other mix), the original for a remix or Nightcore Song, or
   a close but not equal artist and title by a similarity score (rapidfuzz).
-  The threshold is fixed in US-05's plan from the quality set.
+  The score is the lower of the artist score (the better of rapidfuzz's
+  `ratio` and `token_sort_ratio`, so names in either order count) and the
+  title score (`ratio`, also between base titles). The threshold is **80**:
+  the highest value that keeps every quality-set Song at least Doubtful,
+  measured by #10's build on 2026-10-17 (Q9).
 - **Unmatched:** nothing reaches the Doubtful threshold.
 - A Track by a different artist is never Certain.
 
@@ -307,9 +319,8 @@ quality set.
 
 ## Further Notes
 
-**Open questions for the plans** (the spec does not decide them; the plan
-of the named story asks the owner):
-- US-05: the similarity threshold for Doubtful, fixed from the quality set.
+**Open questions for the plans:** none left; the last ones were answered in
+#10.
 
 **Facts this spec rests on** (checked 2026-10-14, see `../../../handoff.md`):
 Spotify development mode (5 users, owner needs Premium), the February 2026
