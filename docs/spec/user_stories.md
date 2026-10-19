@@ -10,8 +10,8 @@ story; full stories below. Open and future work lives in `../open_threads.md`.
 | US-01 | Find the lazer folder | 1 Read lazer | ✅ ready | #5 |
 | US-02 | Read Songs from lazer | 1 Read lazer | ✅ ready | #6 |
 | US-03 | Connect to Spotify | 2 Spotify | ✅ ready | #7 |
-| US-04 | Name and create the Playlist | 2 Spotify | 🔲 draft | |
-| US-05 | Match Songs to Tracks | 3 Matching | 🔲 draft | |
+| US-04 | Name and create the Playlist | 2 Spotify | ✅ ready | #8 |
+| US-05 | Match Songs to Tracks | 3 Matching | ✅ ready | #9, #10 |
 | US-06 | Add Certain matches | 4 Fill the Playlist | 🔲 draft | |
 | US-07 | Review Doubtful matches | 4 Fill the Playlist | 🔲 draft | |
 | US-08 | List the Unmatched Songs | 4 Fill the Playlist | 🔲 draft | |

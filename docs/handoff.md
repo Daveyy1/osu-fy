@@ -16,33 +16,40 @@ requests are the record of that.*
    found by that id in later Sessions; and US-05a, search Spotify at a
    safe pace (#9, PR #28): `find_tracks`, every request at least 1 s
    apart, a 429 stops with "Spotify asks us to wait <time>", and the first
-   rule (exact artist and title, either script, is Certain). PR #24 also
-   built US-10.3 and
+   rule (exact artist and title, either script, is Certain); and US-05b,
+   matching rules and the quality set (#10, PR #30): cut markers, other
+   scripts, versions and covers per US-05, a fuzzy score that is at least
+   80 for a Doubtful match (`DOUBTFUL`), and the quality set in the git-ignored `app/tests/recordings/`.
+   PR #24 also built US-10.3 and
    US-10.4 for the login only; #15 builds the rest of US-10. #15 also
    builds the refresh at every start that US-03.5 asks for since PR #25:
    the code still refreshes only an expired token. #15 also handles a 403
    or other 4xx from creating or finding the Playlist, which still raises
    a traceback, and a 429 on the token refresh, which opens the browser
    instead of the wait message. Nothing found is kept between Sessions
-   yet (US-09). Issues #8 to #16 hold the
+   yet (US-09). Issues #11 to #16 hold the
    rest of version one, one per ticket, with GitHub's native "blocked by"
    links; `docs/spec/roadmap.md` maps them.
 2. Next: in a work session (`claude --settings .claude/work-settings.json`),
-   `/plan 10` (matching rules and the quality set, US-05b), following the
-   roadmap. The y/n round for the quality set happens in that plan, and
-   the owner does it straight away: the plan proposes a Track for each of
-   about ten Songs the old tool missed, and the owner answers y/n on the
-   issue together with the other questions. The 154 matched Songs come
-   from the old tool's last lazer export in the private
-   `Daveyy1/OsuSongParser`; the plan asks how to get them if `gh` cannot
-   read that repository. The quality set and the recordings stay in the
-   git-ignored `app/tests/recordings/` (Q1 of #9). Then the owner sets
-   `plan-approved`, and `/build`.
-3. What PR #28's real search showed (8 sample Songs, 2026-10-17): the
-   `track:`/`artist:` filters work; a query that keeps a cut marker
-   (`Hana ni Natte (TV Size)`) finds nothing; searches in the original
-   script (`鹿乃`, `緑黄色社会`, `ナイトメア`) find nothing; result 1 Certain
-   match, 7 Unmatched Songs. #10 should see that number fall.
+   `/plan 11` (add Certain matches, US-06), following the roadmap. Then
+   the owner sets `plan-approved`, and `/build`.
+3. What PR #30 left for later issues:
+   - On the owner's library, 52 Doubtful matches go to the Review (#12).
+     Some are other versions or releases the old tool took as matched.
+     `RADWIMPS – Zen Zen Zense (movie ver.)` gets `Zenzenzense - English
+     Version` as a Doubtful match, so the Review offers a wrong version
+     there; `Linked Horizon – Shinzou o Sasageyo! [TV Size]` stays
+     Unmatched (Spotify's search misses the other romanisation).
+   - The Doubtful threshold of 80 has no margin: `Ke$ha → Kesha –
+     Backstabber` and `Vickeblanka → VK Blanka – Black Rover` score
+     exactly 80. A rule change that moves either needs the quality set
+     run again.
+   - The quality set and the sample replay run only where
+     `tests/recordings/` exists (the owner's machine), not in CI, and the
+     recordings go stale as Spotify's catalogue moves.
+   - Of the 104 Certain matches in the owner's real Session, only the 90
+     in the quality set are known to be right. #11 adds them to the
+     Playlist, so its check in the running app should look at the rest.
 
 ## Settled in the interview (rounds 1 to 7), now written into `docs/spec/`
 - **What it is:** osu-fy turns the Songs a Player knows from osu! into a
