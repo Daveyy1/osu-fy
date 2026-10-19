@@ -19,7 +19,8 @@ requests are the record of that.*
    rule (exact artist and title, either script, is Certain); and US-05b,
    matching rules and the quality set (#10, PR #30): cut markers, other
    scripts, versions and covers per US-05, a fuzzy score that is at least
-   80 for a Doubtful match (`DOUBTFUL`), and the quality set in the git-ignored `app/tests/recordings/`.
+   80 for a Doubtful match (`DOUBTFUL`), and the quality set in the
+   git-ignored `app/tests/recordings/`.
    PR #24 also built US-10.3 and
    US-10.4 for the login only; #15 builds the rest of US-10. #15 also
    builds the refresh at every start that US-03.5 asks for since PR #25:
