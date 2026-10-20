@@ -15,10 +15,11 @@ It greets you, finds your lazer folder (US-01), reads it with a progress
 bar and shows "Found <n> Songs in <m> Beatmapsets" (US-02), logs in to
 Spotify (US-03), creates your Playlist or finds it again (US-04), searches
 Spotify for every Song with a progress bar and shows how many are Certain
-matches, Doubtful matches and Unmatched Songs (US-05), then waits; `q` (or
-`Q`, or Ctrl+C) quits at any prompt. Adding Tracks (US-06) and the Review
-(US-07) are not built yet, and nothing found is kept between Sessions
-(US-09).
+matches, Doubtful matches and Unmatched Songs (US-05), appends the Tracks
+of the Certain matches that are not in the Playlist yet and shows "Added
+<n> Tracks to <Playlist name>" (US-06), then ends. `q` (or `Q`, or Ctrl+C)
+quits at any prompt. The Review (US-07) and the Unmatched list (US-08) are
+not built yet, and nothing found is kept between Sessions (US-09).
 
 **Files:** osu-fy remembers the confirmed lazer folder, your Spotify
 Client ID and your Playlist's Spotify id in `%APPDATA%\osu-fy\settings.json`, and the Spotify login (access
@@ -96,6 +97,20 @@ hand when you are done.
 | The quality set (US-05.12) | Below: `test_US_05_12_the_quality_set` replays it and prints "Unmatched among the old Unmatched Songs: <n> of <m>". |
 | The pace (US-05.9) | Your real lazer folder: about 300 Songs take minutes, not seconds. |
 | Too many requests (US-05.11) | Cannot be provoked safely by hand; automated tests only. |
+
+### Reaching each state of US-06
+
+osu-fy never removes a Track. A wrong Track has to be removed by hand in
+Spotify. To try it without touching your real Playlist, copy
+`%APPDATA%\osu-fy\settings.json`, delete its `spotify_playlist_id` line,
+run (osu-fy creates a fresh Playlist), look, then put the copy back.
+
+| State | How |
+|-------|-----|
+| Certain matches added (US-06.1, US-06.5) | Start osu-fy with your real lazer folder. After the summary, "Added <n> Tracks to <Playlist name>"; the Playlist holds them in Spotify. More than 100 go out in several requests. |
+| A Track already there (US-06.2) | Add one of the Certain matches' Tracks to the Playlist by hand in the Spotify app, then start osu-fy again: "(<n> were already in the Playlist)". A second Session shows every Certain Track as already there. |
+| One Track for two Songs (US-06.3) | No known pair in the sample folder; automated tests cover it. After a Session on your real folder, the Playlist holds no Track twice. |
+| Order kept (US-06.4) | Add a few Tracks by hand first, note their order, run osu-fy: they come first, unchanged. |
 
 **Recorded answers and the quality set.** `uv run --directory app python
 tests/record_searches.py` makes the searches of a Session for the sample
