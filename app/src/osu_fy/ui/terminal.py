@@ -23,10 +23,6 @@ class TerminalPlayer:
         self._console.print("osu-fy — your osu! Songs, on Spotify")
         self._console.print("Press q to quit.")
 
-    def wait_for_quit(self) -> None:
-        while readchar.readkey().lower() != "q":
-            pass
-
     def confirm_lazer_folder(self, path: Path) -> bool:
         self._say(str(path))
         self._say("Use this lazer folder? [Y/n] ", end="")
@@ -164,6 +160,10 @@ class TerminalPlayer:
             f"{certain} Certain matches, {doubtful} Doubtful matches, "
             f"{unmatched} Unmatched Songs"
         )
+
+    def show_tracks_added(self, added: int, already: int, playlist: Playlist) -> None:
+        already_there = f" ({already} were already in the Playlist)" if already else ""
+        self._say(f"Added {added} Tracks to {playlist.name}{already_there}")
 
     def _say(self, text: str, end: str = "\n") -> None:
         # A path prints as it is: "[old]" is no markup, and the terminal wraps it
