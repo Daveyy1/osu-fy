@@ -58,7 +58,10 @@ file, so name the exact operations and data it needs.*
     the description is `Songs from osu!, added by osu-fy`.
   - `GET /v1/me/playlists?limit=50&offset=…` for `find_playlist`.
     `POST /v1/users/{id}/playlists` no longer exists for new apps.
-  - `GET /v1/playlists/{id}/items?limit=100&offset=…&fields=items(track(id)),next`.
+  - `GET /v1/playlists/{id}/items?limit=100&offset=…&fields=items(item(id)),next`.
+    Since February 2026 an item holds its Track under `item`, not `track`;
+    `fields=items(track(id))` returns empty objects (checked 2026-10-19, #11).
+    A local file's `item.id` is null.
   - `POST /v1/playlists/{id}/items` with `{"uris": [...]}`, at most 100
     items per call. The old `/tracks` path was renamed.
   - `GET /v1/me` for the display name after login.
@@ -85,7 +88,8 @@ file, so name the exact operations and data it needs.*
     then stop with "Can't reach Spotify. Everything found so far is kept;
     try again later." No traceback is shown.
 - **Fake adapter:** used only in tests, never in the running app. It holds
-  Playlists in memory, enforces "append only" and the 100-per-request limit,
+  Playlists in memory, enforces "append only" (the Spotify adapter splits
+  into requests of at most 100; #11),
   and answers `find_tracks` from **recorded answers**: real search results
   saved once from the real API, stored next to the tests, keyed by query.
   A query with no recording fails the test loudly rather than returning

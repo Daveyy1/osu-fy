@@ -7,7 +7,7 @@ from osu_fy.adapters.lazer import LazerSource
 from osu_fy.core.session import run_session
 
 
-def test_session_reads_songs_logs_in_creates_the_playlist_searches_then_waits(
+def test_US_06_1_session_reads_songs_logs_in_creates_the_playlist_searches_and_adds(
     tmp_path: Path,
 ) -> None:
     (tmp_path / "osu" / "files").mkdir(parents=True)
@@ -28,5 +28,5 @@ def test_session_reads_songs_logs_in_creates_the_playlist_searches_then_waits(
         "Name for your Playlist [osu!fy]:",
         "Created your Playlist osu!fy https://open.spotify.com/playlist/created-1",
         "0 Certain matches, 0 Doubtful matches, 0 Unmatched Songs",
-        "wait_for_quit",
+        "Added 0 Tracks to osu!fy",
     ]

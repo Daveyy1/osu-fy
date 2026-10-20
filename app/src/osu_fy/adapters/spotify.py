@@ -32,6 +32,7 @@ REQUEST_TIMEOUT = 10  # seconds (api_contracts)
 CANT_REACH = "Can't reach Spotify. Everything found so far is kept; try again later."
 PORT_IN_USE = f"Port {PORT} is in use; is osu-fy already running?"
 DESCRIPTION = "Songs from osu!, added by osu-fy"
+ADD_LIMIT = 100  # Tracks per request to add (api_contracts)
 GAP = 1.0  # seconds between two requests; also keeps to 30 in any 30 s (US-05.9)
 
 # spotipy logs the Authorization header and token requests at DEBUG (N3); a level,
@@ -158,6 +159,31 @@ class Spotify:
             for item in found["tracks"]["items"]
             if item  # null for an item Spotify cannot show
         ]
+
+    def tracks_in_playlist(self, playlist: Playlist) -> set[str]:
+        client = self._logged_in()
+        tracks: set[str] = set()
+        with _reachable():
+            # since February 2026 an item holds its Track under `item`, not `track` (Q5)
+            page = client.playlist_items(
+                playlist.id, fields="items(item(id)),next", limit=100
+            )
+            while page is not None:
+                for entry in page["items"]:
+                    # null for a local file or an item Spotify cannot show
+                    if (item := entry.get("item")) and item.get("id"):
+                        tracks.add(item["id"])
+                page = client.next(page)  # None after the last page
+        return tracks
+
+    def append_tracks(self, playlist: Playlist, tracks: list[str]) -> None:
+        client = self._logged_in()
+        with _reachable():
+            for start in range(0, len(tracks), ADD_LIMIT):
+                # never a position: Spotify then appends at the end (N1)
+                client.playlist_add_items(
+                    playlist.id, tracks[start : start + ADD_LIMIT]
+                )
 
     def _logged_in(self) -> spotipy.Spotify:
         assert self._client is not None, "log_in comes first in every Session"

@@ -15,9 +15,6 @@ class ScriptedPlayer:
     def greet(self) -> None:
         self.shown.append("greet")
 
-    def wait_for_quit(self) -> None:
-        self.shown.append("wait_for_quit")
-
     def confirm_lazer_folder(self, path: Path) -> bool:
         self.shown.append(f"Use this lazer folder? {path}")
         answer = self._next()
@@ -97,6 +94,10 @@ class ScriptedPlayer:
             f"{certain} Certain matches, {doubtful} Doubtful matches, "
             f"{unmatched} Unmatched Songs"
         )
+
+    def show_tracks_added(self, added: int, already: int, playlist: Playlist) -> None:
+        already_there = f" ({already} were already in the Playlist)" if already else ""
+        self.shown.append(f"Added {added} Tracks to {playlist.name}{already_there}")
 
     def _next(self) -> bool | str | None:
         assert self.answers, "osu-fy asked more than the script answers"

@@ -8,8 +8,9 @@ INCOMPLETE = LoginIncomplete()
 class FakeStreaming:
     """log_in answers from a script: a display name, or INCOMPLETE after the browser opened.
 
-    library holds the playlists in the Player's Spotify library, by id; searches
-    the answer to each search, by (artist, title).
+    library holds the playlists in the Player's Spotify library, by id; contents
+    the Track ids in each Playlist, by id, in order; searches the answer to each
+    search, by (artist, title).
     """
 
     def __init__(self, *logins: str | LoginIncomplete) -> None:
@@ -17,6 +18,7 @@ class FakeStreaming:
         self.client_ids: list[str] = []
         self.library: dict[str, Playlist] = {}
         self.created: list[str] = []
+        self.contents: dict[str, list[str]] = {}
         self.searches: dict[tuple[str, str], list[Track]] = {}
         self.searched: list[tuple[str, str]] = []
 
@@ -37,6 +39,7 @@ class FakeStreaming:
             playlist_id, name, f"https://open.spotify.com/playlist/{playlist_id}"
         )
         self.library[playlist_id] = playlist
+        self.contents[playlist_id] = []
         return playlist
 
     def find_playlist(self, playlist_id: str) -> Playlist | None:
@@ -47,3 +50,10 @@ class FakeStreaming:
         # loud, so a test never passes on a search it did not expect
         assert (artist, title) in self.searches, f"no answer for {artist} – {title}"
         return self.searches[(artist, title)]
+
+    def tracks_in_playlist(self, playlist: Playlist) -> set[str]:
+        return set(self.contents[playlist.id])
+
+    def append_tracks(self, playlist: Playlist, tracks: list[str]) -> None:
+        # append only: nothing else changes a Playlist (N1)
+        self.contents[playlist.id] += tracks

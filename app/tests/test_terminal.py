@@ -27,17 +27,6 @@ def test_greeting_reaches_the_screen() -> None:
     )
 
 
-@pytest.mark.parametrize("quit_key", ["q", "Q"])
-def test_q_quits_and_other_keys_are_ignored(
-    monkeypatch: pytest.MonkeyPatch, quit_key: str
-) -> None:
-    remaining = press(monkeypatch, "x", readchar.key.ENTER, quit_key, "never read")
-
-    TerminalPlayer(Console()).wait_for_quit()
-
-    assert list(remaining) == ["never read"]
-
-
 @pytest.mark.parametrize(
     ("key", "accepted"),
     [(readchar.key.ENTER, True), ("y", True), ("Y", True), ("n", False), ("N", False)],
@@ -369,4 +358,18 @@ def test_US_05_10_the_summary_reaches_the_screen() -> None:
 
     assert console.export_text() == (
         "154 Certain matches, 0 Doubtful matches, 138 Unmatched Songs\n"
+    )
+
+
+def test_US_06_1_and_06_2_the_added_message_reaches_the_screen() -> None:
+    console = Console(record=True, width=80)
+    player = TerminalPlayer(console)
+    playlist = Playlist("pl", "[b]osu!fy", "https://open.spotify.com/playlist/pl")
+
+    player.show_tracks_added(104, 0, playlist)
+    player.show_tracks_added(3, 2, playlist)
+
+    assert console.export_text() == (
+        "Added 104 Tracks to [b]osu!fy\n"
+        "Added 3 Tracks to [b]osu!fy (2 were already in the Playlist)\n"
     )

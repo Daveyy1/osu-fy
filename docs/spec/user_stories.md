@@ -267,14 +267,16 @@ away** so that **I only spend time on the ones that need me**.
 - **US-06.2** (N5) Given a Track that is already in the Playlist, whether
   osu-fy or the Player put it there (add one by hand in the Spotify app),
   then it is not added again, and the message says "(<n> were already in
-  the Playlist)".
+  the Playlist)". <n> counts distinct Tracks; the part is left out when
+  <n> is 0.
 - **US-06.3** (N5) Given two Songs matched to the same Track, then the
   Track is added once.
 - **US-06.4** (N1) Given the Playlist already holds Tracks, then after the
   Session they are all still there in the same order, and the new Tracks
   come after them.
 - **US-06.5** Given more than 100 Tracks to add, then they are appended in
-  requests of at most 100. Automated test; by hand, 148 Tracks all arrive.
+  requests of at most 100. Automated test; by hand, all Certain matches
+  arrive (104 on the owner's library, 2 requests).
 
 Out of scope: Doubtful matches (US-07).
 
