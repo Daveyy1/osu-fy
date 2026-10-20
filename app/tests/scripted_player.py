@@ -15,9 +15,6 @@ class ScriptedPlayer:
     def greet(self) -> None:
         self.shown.append("greet")
 
-    def wait_for_quit(self) -> None:
-        self.shown.append("wait_for_quit")
-
     def confirm_lazer_folder(self, path: Path) -> bool:
         self.shown.append(f"Use this lazer folder? {path}")
         answer = self._next()

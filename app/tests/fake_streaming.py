@@ -39,6 +39,7 @@ class FakeStreaming:
             playlist_id, name, f"https://open.spotify.com/playlist/{playlist_id}"
         )
         self.library[playlist_id] = playlist
+        self.contents[playlist_id] = []
         return playlist
 
     def find_playlist(self, playlist_id: str) -> Playlist | None:
