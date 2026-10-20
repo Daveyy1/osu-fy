@@ -29,6 +29,8 @@ TOKEN_URL = "https://accounts.spotify.com/api/token"
 ME_URL = "https://api.spotify.com/v1/me/"  # spotipy adds the slash
 PLAYLISTS_URL = "https://api.spotify.com/v1/me/playlists"
 SEARCH_URL = "https://api.spotify.com/v1/search"
+ITEMS_URL = "https://api.spotify.com/v1/playlists/mine/items"
+MINE = Playlist("mine", "osu!fy", "https://open.spotify.com/playlist/mine")
 
 
 def keep_waiting(login_url: str | None) -> bool:
@@ -36,9 +38,10 @@ def keep_waiting(login_url: str | None) -> bool:
 
 
 class FakeSpotifySession(requests.Session):
-    """Answers the token, /v1/me and /v1/me/playlists calls like Spotify.
+    """Answers the token, /v1/me, /v1/me/playlists and playlist-items calls like Spotify.
 
-    Records every request with what it sent: form data, a JSON body or the query.
+    Records every request with what it sent: form data, a JSON body or the query;
+    a JSON list body as {"body": [...]} with the query.
     """
 
     def __init__(self) -> None:
@@ -46,6 +49,7 @@ class FakeSpotifySession(requests.Session):
         self.requests: list[tuple[str, str, dict[str, Any]]] = []
         self.me: dict[str, Any] = {"display_name": "Kanon", "id": "kanon-id"}
         self.library: list[dict[str, Any]] = []  # the Player's playlists, in order
+        self.items: list[dict[str, Any]] = []  # the items of the playlist "mine"
         self.refresh_refused = False
         self.unreachable = False
         self.found: list[dict[str, Any] | None] = []  # what a search finds
@@ -63,7 +67,10 @@ class FakeSpotifySession(requests.Session):
         # requests leaves out None, as spotipy relies on
         query |= {k: str(v) for k, v in params.items() if v is not None}
         url = url.split("?")[0]
-        self.requests.append((method, url, dict(data) or query))
+        if isinstance(data, list):  # spotipy posts the URIs to add as a bare list
+            self.requests.append((method, url, {"body": data} | query))
+        else:
+            self.requests.append((method, url, dict(data) or query))
         if self.unreachable:
             raise requests.ConnectionError("no network")
         if url == TOKEN_URL and data.get("grant_type") == "authorization_code":
@@ -77,6 +84,21 @@ class FakeSpotifySession(requests.Session):
             return answer(url, 429, {"error": {"status": 429}}, headers)
         if url == ME_URL:
             return answer(url, 200, self.me)
+        if method == "POST" and url == ITEMS_URL:
+            return answer(url, 201, {"snapshot_id": "made-up"})
+        if method == "GET" and url == ITEMS_URL:
+            offset, limit = int(query.get("offset", 0)), int(query["limit"])
+            more = offset + limit < len(self.items)
+            return answer(
+                url,
+                200,
+                {
+                    "items": self.items[offset : offset + limit],
+                    "next": f"{url}?offset={offset + limit}&limit={limit}"
+                    if more
+                    else None,
+                },
+            )
         if method == "GET" and url == SEARCH_URL:
             return answer(url, 200, {"tracks": {"items": self.found}})
         if method == "POST" and url == PLAYLISTS_URL:
@@ -536,6 +558,81 @@ def test_US_03_7_the_search_contacts_only_api_spotify_com(
     assert {urlparse(url).hostname for _, url, _ in session.requests} == {
         "api.spotify.com"
     }
+
+
+def playlist_item(track_id: str | None) -> dict[str, Any]:
+    """A playlist item as Spotify sends it since February 2026 (checked on #11)."""
+    return {"item": {"id": track_id}}
+
+
+def test_US_06_2_reads_every_track_in_the_playlist_page_by_page(
+    tmp_path: Path, no_browser: None, session: FakeSpotifySession
+) -> None:
+    session.items = [playlist_item(f"track{n}") for n in range(149)]
+    session.items.insert(7, playlist_item(None))  # a local file has no id
+
+    found = logged_in(tmp_path, session).tracks_in_playlist(MINE)
+
+    assert found == {f"track{n}" for n in range(149)}
+    [(_, first_url, first), (_, second_url, second)] = session.requests
+    assert first_url == second_url == ITEMS_URL
+    assert first["fields"] == "items(item(id)),next"  # `track` is empty since 2026
+    assert (first["limit"], first["offset"]) == ("100", "0")
+    assert second["offset"] == "100"
+
+
+def test_US_06_5_more_than_100_tracks_go_out_in_requests_of_at_most_100(
+    tmp_path: Path, no_browser: None, session: FakeSpotifySession
+) -> None:
+    tracks = [f"track{n}" for n in range(148)]
+
+    logged_in(tmp_path, session).append_tracks(MINE, tracks)
+
+    uris = [f"spotify:track:{track}" for track in tracks]
+    # no position anywhere: Spotify then appends at the end (US-06.4)
+    assert session.requests == [
+        ("POST", ITEMS_URL, {"body": uris[:100]}),
+        ("POST", ITEMS_URL, {"body": uris[100:]}),
+    ]
+
+
+def test_nothing_to_append_sends_no_request(
+    tmp_path: Path, no_browser: None, session: FakeSpotifySession
+) -> None:
+    logged_in(tmp_path, session).append_tracks(MINE, [])
+
+    assert session.requests == []
+
+
+def test_US_03_7_the_playlist_items_calls_contact_only_api_spotify_com(
+    tmp_path: Path, no_browser: None, session: FakeSpotifySession
+) -> None:
+    adapter = logged_in(tmp_path, session)
+
+    adapter.tracks_in_playlist(MINE)
+    adapter.append_tracks(MINE, ["track1"])
+
+    assert {urlparse(url).hostname for _, url, _ in session.requests} == {
+        "api.spotify.com"
+    }
+
+
+@pytest.mark.parametrize("call", ["read", "append"])
+def test_spotify_unreachable_while_adding_stops_with_the_clear_message(
+    tmp_path: Path, no_browser: None, session: FakeSpotifySession, call: str
+) -> None:
+    adapter = logged_in(tmp_path, session)
+    session.unreachable = True
+
+    with pytest.raises(StreamingServiceUnavailable) as stop:
+        if call == "read":
+            adapter.tracks_in_playlist(MINE)
+        else:
+            adapter.append_tracks(MINE, ["track1"])
+
+    assert str(stop.value) == (
+        "Can't reach Spotify. Everything found so far is kept; try again later."
+    )
 
 
 class FakeTime:
