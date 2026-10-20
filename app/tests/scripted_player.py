@@ -98,6 +98,10 @@ class ScriptedPlayer:
             f"{unmatched} Unmatched Songs"
         )
 
+    def show_tracks_added(self, added: int, already: int, playlist: Playlist) -> None:
+        already_there = f" ({already} were already in the Playlist)" if already else ""
+        self.shown.append(f"Added {added} Tracks to {playlist.name}{already_there}")
+
     def _next(self) -> bool | str | None:
         assert self.answers, "osu-fy asked more than the script answers"
         answer = self.answers.pop(0)

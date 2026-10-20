@@ -93,6 +93,10 @@ class Player(Protocol):
         self, certain: int, doubtful: int, unmatched: int
     ) -> None: ...
 
+    def show_tracks_added(self, added: int, already: int, playlist: Playlist) -> None:
+        """already counts the distinct Tracks that were in the Playlist before."""
+        ...
+
 
 class Source(Protocol):
     """Where the Songs come from: osu!lazer for now."""
@@ -130,4 +134,12 @@ class StreamingService(Protocol):
 
     def find_tracks(self, artist: str, title: str) -> list[Track]:
         """At most 10 candidate Tracks for one search."""
+        ...
+
+    def tracks_in_playlist(self, playlist: Playlist) -> set[str]:
+        """The ids of every Track in the Playlist, whoever added it, read from the service."""
+        ...
+
+    def append_tracks(self, playlist: Playlist, tracks: list[str]) -> None:
+        """Appends the Tracks with these ids at the end of the Playlist, in this order."""
         ...
