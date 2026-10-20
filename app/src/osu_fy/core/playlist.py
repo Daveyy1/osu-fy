@@ -30,7 +30,10 @@ def ensure_playlist(
 
 
 def add_certain_matches(
-    matches: list[Match], streaming: StreamingService, player: Player, playlist: Playlist
+    matches: list[Match],
+    streaming: StreamingService,
+    player: Player,
+    playlist: Playlist,
 ) -> None:
     """The Session step that appends the Certain matches' Tracks the Playlist lacks (US-06)."""
     # each Track once, in Song order (US-06.3)

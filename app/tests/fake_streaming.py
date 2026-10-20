@@ -55,4 +55,5 @@ class FakeStreaming:
         return set(self.contents[playlist.id])
 
     def append_tracks(self, playlist: Playlist, tracks: list[str]) -> None:
-        self.contents[playlist.id] += tracks  # append only: nothing else changes it (N1)
+        # append only: nothing else changes a Playlist (N1)
+        self.contents[playlist.id] += tracks
